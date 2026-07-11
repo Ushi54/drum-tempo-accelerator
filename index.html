@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drum Tempo Accelerator</title>
+  <!-- Google Fonts (Inter & Outfit) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b111e 0%, #152238 60%, #2b1f31 100%); /* 藍色から夕暮れの紫・茜へと移り変わる空 */
+      --card-bg: rgba(21, 34, 56, 0.55); /* 藍色のガラス */
+      --border-color: rgba(224, 229, 236, 0.15);
+      --accent-primary: #d05a3f; /* 茜（あかね）色 - 夕暮れの象徴 */
+      --accent-secondary: #ebd39c; /* 月光色 - 儚いイエロー */
+      --accent-tertiary: #4c6b8c; /* 藍ねず */
+      --accent-warning: #db7d67; 
+      --text-main: #e8ecf1; /* ほんのり青みがかった白 */
+      --text-muted: #7f91a8; /* かすんだコバルト藍 */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Yu Gothic Medium", "游ゴシック Medium", YuGothic, "游ゴシック", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html {
+      background: #0b111e; /* バックアップ背景色（ヨルシカ藍色） */
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+      color: var(--text-main);
+      height: 100vh;
+      height: -webkit-fill-available; /* iOS Safari compatibility */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      max-width: 440px;
+      max-height: 800px; /* Limits size on tall screens/PC */
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 28px;
+      padding: 16px 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    /* Decorative background glows */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 120%;
+      height: 120%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, rgba(168, 85, 247, 0.03) 70%, transparent 100%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 3px;
+      letter-spacing: 2px;
+    }
+
+    /* Main BPM Display Area */
+    .display-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 5px;
+      margin-bottom: 8px;
+    }
+
+    .bpm-ring-outer {
+      width: 125px;
+      height: 125px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(21, 34, 56, 0.95) 60%, rgba(11, 17, 30, 0.98) 100%);
+      border: 3px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.6), 
+                  0 10px 30px -10px rgba(208, 90, 63, 0.2);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .bpm-ring-outer.active-accent-1 {
+      border-color: var(--accent-primary);
+      box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.6), 
+                  0 0 35px rgba(208, 90, 63, 0.4);
+    }
+
+    .bpm-ring-outer.active-accent-other {
+      border-color: var(--accent-secondary);
+      box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.6), 
+                  0 0 25px rgba(235, 211, 156, 0.3);
+    }
+
+    .bpm-number {
+      font-size: 3.0rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text-main);
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .bpm-number-input {
+      font-size: 3.0rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
+      text-align: center;
+      width: 105px;
+      outline: none;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      -moz-appearance: textfield;
+    }
+
+    .bpm-number-input::-webkit-outer-spin-button,
+    .bpm-number-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .bpm-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-top: -1px;
+    }
+
+    /* Beat Indicator Dots */
+    .beat-indicators {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-color);
+      transition: transform 0.1s, background-color 0.15s, box-shadow 0.15s;
+    }
+
+    .dot.active-beat-1 {
+      background: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-primary);
+      transform: scale(1.3);
+    }
+
+    .dot.active-beat-other {
+      background: var(--accent-secondary);
+      box-shadow: 0 0 6px var(--accent-secondary);
+      transform: scale(1.15);
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      background: rgba(11, 17, 30, 0.45);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+
+    .panel-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px; /* Compacted row margins */
+    }
+
+    .panel-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .label-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .field-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* Switch Custom Design */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.15);
+      transition: .4s;
+      border-radius: 34px;
+      border: 1px solid var(--border-color);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* Parameter Inputs styling */
+    .param-inputs {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease-out, opacity 0.25s;
+      opacity: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .param-inputs.expanded {
+      max-height: 165px;
+      opacity: 1;
+      margin-top: 6px;
+      padding-top: 6px;
+    }
+
+    .grid-inputs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .input-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .input-box label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .input-box input {
+      background: rgba(11, 17, 30, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 4px 8px;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-box input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    /* Master Slider */
+    .bpm-slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px; /* Force spacing before settings panel */
+    }
+
+    .bpm-slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .slider-input {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      cursor: pointer;
+      box-shadow: 0 0 6px var(--accent-primary);
+      transition: transform 0.1s;
+    }
+
+    .slider-input::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Main Action Button */
+    .play-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #d05a3f 0%, #a83f27 100%); /* 茜色のグラデーション */
+      color: #e8ecf1;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      box-shadow: 0 8px 16px -5px rgba(208, 90, 63, 0.4);
+      transition: transform 0.1s, box-shadow 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-top: 15px;
+    }
+
+    .play-btn:hover {
+      box-shadow: 0 12px 20px -5px rgba(16, 185, 129, 0.5);
+    }
+
+    .play-btn:active {
+      transform: scale(0.98);
+    }
+
+    .play-btn.playing {
+      background: linear-gradient(135deg, #152238 0%, #0b111e 100%); /* 藍色の夜空 */
+      color: #ebd39c; /* 月光色の文字 */
+      border: 1px solid rgba(235, 211, 156, 0.3);
+      box-shadow: 0 8px 16px -5px rgba(21, 34, 56, 0.4);
+    }
+
+    .play-icon, .stop-icon {
+      fill: currentColor;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Status Bar info */
+    .status-bar {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-height: 15px;
+      flex-shrink: 0;
+      margin-top: 8px;
+    }
+
+    .status-bar span {
+      font-weight: 600;
+      color: var(--accent-tertiary);
+    }
+
+    /* Custom Modal styling for mobile app feel */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 17, 30, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: rgba(21, 34, 56, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 35px 25px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.show .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-icon {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+      animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    .modal-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .modal-message {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .modal-message span {
+      font-weight: 800;
+      color: var(--accent-primary);
+      font-size: 1.3rem;
+    }
+
+    .modal-btn {
+      background: linear-gradient(135deg, #d05a3f 0%, #a83f27 100%);
+      color: #e8ecf1;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 30px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 5px 15px rgba(208, 90, 63, 0.3);
+      transition: transform 0.1s;
+    }
+
+    .modal-btn:active {
+      transform: scale(0.97);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+      <h1>TEMPO ACCELERATOR</h1>
+      <div id="authHeader" style="font-size: 0.8rem; display: flex; align-items: center; gap: 8px;">
+        <button id="authTriggerBtn" onclick="openAuthFlow()" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">ログイン</button>
+      </div>
+    </header>
+
+    <div class="display-section">
+      <div class="bpm-ring-outer" id="bpmRing">
+        <input type="number" class="bpm-number-input" id="bpmValInput" value="120" min="30" max="300">
+        <div class="bpm-label">BPM</div>
+      </div>
+
+      <div class="beat-indicators">
+        <div class="dot" id="dot-0"></div>
+        <div class="dot" id="dot-1"></div>
+        <div class="dot" id="dot-2"></div>
+        <div class="dot" id="dot-3"></div>
+      </div>
+    </div>
+
+    <div class="bpm-slider-container">
+      <div class="bpm-slider-header">
+        <span>SLOW</span>
+        <span id="sliderBpmDisplay">120 BPM</span>
+        <span>FAST</span>
+      </div>
+      <input type="range" min="30" max="300" value="120" class="slider-input" id="bpmSlider">
+    </div>
+
+    <div class="controls-panel">
+      <div class="panel-row">
+        <div class="label-group">
+          <span class="field-title">自動テンポ加速モード</span>
+          <span class="field-desc">練習中に徐々にテンポを上げて負荷をかけます</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoAccToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <!-- Preset Selection Panel -->
+      <div id="presetArea" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">プリセット選択</label>
+          <span id="presetInfo" style="font-size: 0.7rem; color: var(--accent-secondary);"></span>
+        </div>
+        <select id="presetSelect" style="width: 100%; background: rgba(11, 17, 30, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px; color: var(--text-main); font-size: 0.85rem; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none;">
+          <option value="">-- 選択してください --</option>
+        </select>
+      </div>
+
+      <!-- Non-logged in prompt -->
+      <div id="presetPrompt" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 0.7rem; color: var(--text-muted);">
+        💡 ログインすると設定のプリセット保存機能が使えます。
+      </div>
+      <!-- Accelerator Options (Expandable) -->
+      <div class="param-inputs" id="accParams">
+        <div class="grid-inputs" style="margin-top: 5px;">
+          <div class="input-box">
+            <label for="startBpm">開始 BPM</label>
+            <input type="number" id="startBpm" min="30" max="300" value="100">
+          </div>
+          <div class="input-box">
+            <label for="maxBpm">目標(限界) BPM</label>
+            <input type="number" id="maxBpm" min="30" max="300" value="160">
+          </div>
+          <div class="input-box">
+            <label for="accInterval">加速間隔 (小節数)</label>
+            <input type="number" id="accInterval" min="1" max="100" value="4">
+          </div>
+          <div class="input-box">
+            <label for="accAmount">加速量 (+BPM)</label>
+            <input type="number" id="accAmount" min="1" max="50" value="5">
+          </div>
+        </div>
+        <!-- ログイン時のみ表示する保存/削除ボタン -->
+        <div id="presetBtnArea" style="display: none; gap: 8px; margin-top: 12px;">
+          <button id="savePresetBtn" style="flex: 1; background: var(--accent-primary); border: none; color: #2a2f22; font-weight: 800; border-radius: 8px; padding: 8px; font-size: 0.8rem; cursor: pointer;">設定を保存</button>
+          <button id="deletePresetBtn" style="flex: 1; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; padding: 8px; font-size: 0.8rem; cursor: pointer;">選択中を削除</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="play-btn" id="playBtn">
+      <!-- Play Icon -->
+      <svg class="play-icon" id="playIcon" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <!-- Stop Icon (hidden initially) -->
+      <svg class="stop-icon" id="stopIcon" viewBox="0 0 24 24" style="display:none;">
+        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+      </svg>
+      <span id="btnText">START SESSION</span>
+    </button>
+
+    <div class="status-bar" id="statusBar"></div>
+  </div>
+
+  <!-- Custom Achievement Modal -->
+  <div class="modal-overlay" id="achievementModal">
+    <div class="modal-card">
+      <div class="modal-icon">🏆</div>
+      <h2 class="modal-title">目標達成！</h2>
+      <p class="modal-message">お疲れ様でした！<br>目標の <span id="achievedBpm">160</span> BPM に到達しました！</p>
+      <button class="modal-btn" id="modalCloseBtn">閉じる</button>
+    </div>
+  </div>
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-card" style="max-width: 360px;">
+      <h2 class="modal-title" id="authModalTitle">ログイン</h2>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">個人アカウントでログインして設定を保存します</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 20px;">
+        <div class="input-box">
+          <label for="authEmail">メールアドレス</label>
+          <input type="email" id="authEmail" placeholder="user@example.com" style="width: 100%;">
+        </div>
+        <div class="input-box">
+          <label for="authPassword">パスワード</label>
+          <input type="password" id="authPassword" placeholder="••••••••" style="width: 100%;">
+        </div>
+      </div>
+      
+      <button class="modal-btn" id="authSubmitBtn" style="margin-bottom: 12px;">ログイン</button>
+      
+      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+        <span id="authSwitchModeBtn" style="cursor: pointer; text-decoration: underline; color: var(--accent-secondary);">新規アカウント登録はこちら</span>
+        <span id="authCancelBtn" style="cursor: pointer; text-decoration: underline;">キャンセル</span>
+      </div>
+      
+      <div id="authErrorMsg" style="color: #ef4444; font-size: 0.75rem; margin-top: 15px; text-align: center; min-height: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- Save Preset Modal -->
+  <div class="modal-overlay" id="savePresetModal">
+    <div class="modal-card" style="max-width: 360px;">
+      <h2 class="modal-title">プリセットの保存</h2>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">現在の練習メニューの設定に名前をつけて保存します</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 20px;">
+        <div class="input-box">
+          <label for="newPresetNameInput">プリセット名</label>
+          <input type="text" id="newPresetNameInput" value="加速練習メニュー" style="width: 100%;" maxlength="20">
+        </div>
+      </div>
+      
+      <button class="modal-btn" id="savePresetSubmitBtn" style="margin-bottom: 12px;">保存する</button>
+      <button class="modal-btn" id="savePresetCancelBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 700; width: 100%;">キャンセル</button>
+    </div>
+  </div>
+  <script>
+    // --- Web Audio API Scheduler Engine ---
+    let audioCtx = null;
+    let isPlaying = false;
+    
+    // Scheduler variables
+    let bpm = 120;
+    let currentBeat = 0;
+    let nextNoteTime = 0.0;
+    const lookahead = 25.0; // ms, schedule event loop interval
+    const scheduleAheadTime = 0.1; // seconds, how far to schedule future audio
+    let timerID = null;
+    
+    // Beat configuration
+    const beatsPerMeasure = 4;
+    let measureCount = 0;
+    
+    // Auto Accelerator configuration
+    let autoAccelerate = false;
+    let startBpm = 100;
+    let maxBpm = 160;
+    let accInterval = 4;
+    let accAmount = 5;
+    
+    // Sync draw variables
+    const notesInQueue = [];
+    
+    // DOM elements
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const stopIcon = document.getElementById('stopIcon');
+    const btnText = document.getElementById('btnText');
+    const bpmValInput = document.getElementById('bpmValInput');
+    const bpmSlider = document.getElementById('bpmSlider');
+    const sliderBpmDisplay = document.getElementById('sliderBpmDisplay');
+    const autoAccToggle = document.getElementById('autoAccToggle');
+    const accParams = document.getElementById('accParams');
+    const bpmRing = document.getElementById('bpmRing');
+    const statusBar = document.getElementById('statusBar');
+    
+    // Parameter Inputs
+    const inputStartBpm = document.getElementById('startBpm');
+    const inputMaxBpm = document.getElementById('maxBpm');
+    const inputAccInterval = document.getElementById('accInterval');
+    const inputAccAmount = document.getElementById('accAmount');
+
+    // Save Preset Modal Elements
+    const savePresetModal = document.getElementById('savePresetModal');
+    const newPresetNameInput = document.getElementById('newPresetNameInput');
+    const savePresetSubmitBtn = document.getElementById('savePresetSubmitBtn');
+    const savePresetCancelBtn = document.getElementById('savePresetCancelBtn');
+
+    // UI: Toggle auto acceleration panel
+    autoAccToggle.addEventListener('change', (e) => {
+      autoAccelerate = e.target.checked;
+      bpmValInput.disabled = autoAccelerate;
+      updateAuthUI();
+      if (autoAccelerate) {
+        accParams.classList.add('expanded');
+        // Force inputs validation and initialization
+        syncParams();
+        statusBar.textContent = `加速モード準備完了: ${startBpm} 拍/分 ➔ ${maxBpm} 拍/分`;
+      } else {
+        accParams.classList.remove('expanded');
+        statusBar.textContent = "標準テンポモード";
+      }
+    });
+
+    // Synchronize inputs with variables
+    function syncParams() {
+      startBpm = parseInt(inputStartBpm.value) || 100;
+      maxBpm = parseInt(inputMaxBpm.value) || 160;
+      accInterval = parseInt(inputAccInterval.value) || 4;
+      accAmount = parseInt(inputAccAmount.value) || 5;
+    }
+
+    // Input validations
+    [inputStartBpm, inputMaxBpm, inputAccInterval, inputAccAmount].forEach(input => {
+      input.addEventListener('change', () => {
+        syncParams();
+        if (isPlaying && autoAccelerate) {
+          statusBar.innerHTML = `加速中: 目標 <span>${maxBpm} 拍/分</span> (現在: ${bpm} 拍/分)`;
+        }
+      });
+    });
+
+    // BPM Slider adjustments
+    bpmSlider.addEventListener('input', (e) => {
+      if (!autoAccelerate) {
+        bpm = parseInt(e.target.value);
+        bpmValInput.value = bpm;
+        sliderBpmDisplay.textContent = `${bpm} BPM`;
+      }
+    });
+
+    // BPM Input adjustments
+    bpmValInput.addEventListener('input', (e) => {
+      if (!autoAccelerate) {
+        let val = parseInt(e.target.value);
+        if (!isNaN(val)) {
+          const applyBpm = Math.max(1, Math.min(300, val));
+          bpm = applyBpm;
+          bpmSlider.value = applyBpm;
+          sliderBpmDisplay.textContent = `${applyBpm} BPM`;
+        } else {
+          bpmValInput.value = "";
+        }
+      }
+    });
+
+    bpmValInput.addEventListener('blur', (e) => {
+      let val = parseInt(e.target.value);
+      if (isNaN(val) || val < 30) {
+        val = 30;
+      } else if (val > 300) {
+        val = 300;
+      }
+      bpmValInput.value = val;
+      bpm = val;
+      bpmSlider.value = val;
+      sliderBpmDisplay.textContent = `${val} 拍/分`;
+    });
+
+    // --- Web Audio scheduling core logic ---
+    function nextNote() {
+      const secondsPerBeat = 60.0 / bpm;
+      nextNoteTime += secondsPerBeat;
+      
+      currentBeat = (currentBeat + 1) % beatsPerMeasure;
+      
+      if (currentBeat === 0) {
+        measureCount++;
+        
+        // Acceleration trigger: check measure limits
+        if (autoAccelerate) {
+          if (measureCount > 0 && measureCount % accInterval === 0) {
+            if (bpm < maxBpm) {
+              const oldBpm = bpm;
+              bpm = Math.min(maxBpm, bpm + accAmount);
+              
+              // Update UI smoothly on main thread
+              setTimeout(() => {
+                bpmValInput.value = bpm;
+                bpmSlider.value = bpm;
+                sliderBpmDisplay.textContent = `${bpm} 拍/分`;
+                statusBar.innerHTML = `加速！ <span>${oldBpm} ➔ ${bpm} 拍/分</span>`;
+                
+                // Ring pulse feedback
+                bpmRing.classList.add('active-accent-1');
+                setTimeout(() => bpmRing.classList.remove('active-accent-1'), 150);
+              }, 0);
+            } else {
+              // Target BPM reached and completed its measures
+              setTimeout(() => {
+                stopSession();
+                statusBar.innerHTML = `🎉 <span>目標達成！お疲れ様でした！</span>`;
+                achievedBpm.textContent = maxBpm;
+                achievementModal.classList.add('show');
+              }, 0);
+            }
+          }
+        }
+      }
+    }
+
+    function scheduleNote(beatNumber, time) {
+      // Push note to queue for graphic synchronization
+      notesInQueue.push({ note: beatNumber, time: time });
+      
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      // Drum pad friendly click pitch: High click for downbeat, mid click for offbeats
+      if (beatNumber === 0) {
+        osc.frequency.setValueAtTime(1200, time); // High pitched bell-like beat
+      } else {
+        osc.frequency.setValueAtTime(800, time); // Normal tick
+      }
+      
+      // Tight volume envelope (Short click)
+      gainNode.gain.setValueAtTime(1.0, time);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05); // decay
+      
+      osc.start(time);
+      osc.stop(time + 0.06);
+    }
+
+    function scheduler() {
+      while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+        scheduleNote(currentBeat, nextNoteTime);
+        nextNote();
+      }
+      timerID = setTimeout(scheduler, lookahead);
+    }
+
+    // --- Audio-Visual Synchronization Engine ---
+    let lastBeatDrawn = -1;
+    
+    function draw() {
+      if (!isPlaying) return;
+      
+      let currentTime = audioCtx.currentTime;
+      
+      // Keep checking notes queue
+      while (notesInQueue.length && notesInQueue[0].time < currentTime) {
+        const activeBeatInfo = notesInQueue.shift();
+        lastBeatDrawn = activeBeatInfo.note;
+        
+        // Trigger neon glows for dots
+        updateVisualBeats(lastBeatDrawn);
+      }
+      
+      requestAnimationFrame(draw);
+    }
+    
+    function updateVisualBeats(beatNum) {
+      // Clear previous active states
+      for (let i = 0; i < beatsPerMeasure; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        dot.className = 'dot';
+      }
+      
+      // Trigger new glow and outer ring animation
+      const activeDot = document.getElementById(`dot-${beatNum}`);
+      if (beatNum === 0) {
+        activeDot.classList.add('active-beat-1');
+        
+        bpmRing.className = 'bpm-ring-outer active-accent-1';
+        setTimeout(() => {
+          if(isPlaying) bpmRing.className = 'bpm-ring-outer';
+        }, 120);
+      } else {
+        activeDot.classList.add('active-beat-other');
+        
+        bpmRing.className = 'bpm-ring-outer active-accent-other';
+        setTimeout(() => {
+          if(isPlaying) bpmRing.className = 'bpm-ring-outer';
+        }, 80);
+      }
+    }
+
+    // --- Session Control ---
+    function startSession() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      // Resume context if suspended (browser security requirement)
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      isPlaying = true;
+      currentBeat = 0;
+      measureCount = 0;
+      
+      if (autoAccelerate) {
+        syncParams();
+        bpm = startBpm;
+        bpmValInput.value = bpm;
+        bpmSlider.value = bpm;
+        sliderBpmDisplay.textContent = `${bpm} 拍/分`;
+        statusBar.innerHTML = `加速練習開始: <span>${startBpm} 拍/分</span>`;
+      } else {
+        bpm = parseInt(bpmSlider.value);
+        statusBar.textContent = "標準練習モード";
+      }
+      
+      nextNoteTime = audioCtx.currentTime + 0.05;
+      
+      // UI State Shift
+      playBtn.classList.add('playing');
+      playIcon.style.display = 'none';
+      stopIcon.style.display = 'block';
+      btnText.textContent = '練習を停止';
+      
+      scheduler();
+      requestAnimationFrame(draw);
+    }
+
+    function stopSession() {
+      isPlaying = false;
+      clearTimeout(timerID);
+      
+      // UI Reset
+      playBtn.classList.remove('playing');
+      playIcon.style.display = 'block';
+      stopIcon.style.display = 'none';
+      btnText.textContent = '練習を開始';
+      statusBar.textContent = "";
+      bpmRing.className = 'bpm-ring-outer';
+      
+      // Clear visual dots
+      for (let i = 0; i < beatsPerMeasure; i++) {
+        document.getElementById(`dot-${i}`).className = 'dot';
+      }
+      
+      notesInQueue.length = 0; // Clear queue
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        stopSession();
+      } else {
+        startSession();
+      }
+    });
+
+    modalCloseBtn.addEventListener('click', () => {
+      achievementModal.classList.remove('show');
+    });
+
+    // --- Java API Integration (Spring Boot Backend) ---
+    const API_BASE_URL = "http://localhost:8080/api";
+    let currentUser = null;
+    let presetsList = [];
+
+    // モーダル要素
+    const authModal = document.getElementById('authModal');
+    const authModalTitle = document.getElementById('authModalTitle');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const authSwitchModeBtn = document.getElementById('authSwitchModeBtn');
+    const authCancelBtn = document.getElementById('authCancelBtn');
+    const authErrorMsg = document.getElementById('authErrorMsg');
+
+    // UI要素
+    const authHeader = document.getElementById('authHeader');
+    const presetArea = document.getElementById('presetArea');
+    const presetPrompt = document.getElementById('presetPrompt');
+    const presetSelect = document.getElementById('presetSelect');
+    const savePresetBtn = document.getElementById('savePresetBtn');
+    const deletePresetBtn = document.getElementById('deletePresetBtn');
+    const presetInfo = document.getElementById('presetInfo');
+
+    let authMode = 'login'; // 'login' or 'signup'
+
+    // 起動時の初期化
+    function initAuth() {
+      const storedId = localStorage.getItem('drum_user_id');
+      const storedEmail = localStorage.getItem('drum_user_email');
+      
+      if (storedId && storedEmail) {
+        currentUser = { id: storedId, email: storedEmail };
+        updateAuthUI();
+        loadPresets();
+      } else {
+        updateAuthUI();
+      }
+    }
+
+    // ログイン状態に応じたUIアップデート
+    function updateAuthUI() {
+      if (currentUser) {
+        authHeader.innerHTML = `
+          <span style="color: var(--text-muted); font-size: 0.75rem; text-overflow: ellipsis; overflow: hidden; max-width: 100px; white-space: nowrap;">${currentUser.email}</span>
+          <button id="logoutBtn" onclick="handleLogout()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; padding: 4px 8px; font-size: 0.7rem; font-weight: 600; cursor: pointer;">ログアウト</button>
+        `;
+      } else {
+        authHeader.innerHTML = `
+          <button id="authTriggerBtn" onclick="openAuthFlow()" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">ログイン</button>
+        `;
+      }
+
+      // 自動加速モードONのときだけプリセット選択を表示
+      const presetBtnArea = document.getElementById('presetBtnArea');
+      if (autoAccelerate) {
+        if (currentUser) {
+          presetArea.style.display = 'block';
+          presetPrompt.style.display = 'none';
+          presetBtnArea.style.display = 'flex';
+        } else {
+          presetArea.style.display = 'none';
+          presetPrompt.style.display = 'block';
+          presetBtnArea.style.display = 'none';
+        }
+      } else {
+        presetArea.style.display = 'none';
+        presetPrompt.style.display = 'none';
+        presetBtnArea.style.display = 'none';
+      }
+    }
+
+    // ログインモーダルを開く
+    function openAuthFlow() {
+      authErrorMsg.textContent = "";
+      authEmail.value = "";
+      authPassword.value = "";
+      authModal.classList.add('show');
+    }
+
+    // ログアウト処理
+    function handleLogout() {
+      if (isPlaying) stopSession();
+      currentUser = null;
+      localStorage.removeItem('drum_user_id');
+      localStorage.removeItem('drum_user_email');
+      updateAuthUI();
+      presetsList = [];
+      updatePresetDropdown();
+      statusBar.textContent = "ログアウトしました。";
+    }
+
+    // モーダルキャンセル
+    authCancelBtn.addEventListener('click', () => {
+      authModal.classList.remove('show');
+    });
+
+    // モード切り替え（ログイン / 新規登録）
+    authSwitchModeBtn.addEventListener('click', () => {
+      if (authMode === 'login') {
+        authMode = 'signup';
+        authModalTitle.textContent = '新規登録';
+        authSubmitBtn.textContent = '新規登録';
+        authSwitchModeBtn.textContent = 'ログインはこちら';
+      } else {
+        authMode = 'login';
+        authModalTitle.textContent = 'ログイン';
+        authSubmitBtn.textContent = 'ログイン';
+        authSwitchModeBtn.textContent = '新規アカウント登録はこちら';
+      }
+      authErrorMsg.textContent = "";
+    });
+
+    // ログイン・新規登録送信
+    authSubmitBtn.addEventListener('click', async () => {
+      const email = authEmail.value.trim();
+      const password = authPassword.value.trim();
+
+      if (!email || !password) {
+        authErrorMsg.textContent = "メールアドレスとパスワードを入力してください。";
+        return;
+      }
+
+      authSubmitBtn.disabled = true;
+      authErrorMsg.textContent = "送信中...";
+
+      const endpoint = authMode === 'login' ? '/auth/login' : '/auth/signup';
+
+      try {
+        const response = await fetch(API_BASE_URL + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "認証に失敗しました。");
+        }
+
+        currentUser = { id: data.id, email: data.email };
+        localStorage.setItem('drum_user_id', data.id);
+        localStorage.setItem('drum_user_email', data.email);
+
+        authModal.classList.remove('show');
+        statusBar.textContent = data.message;
+        updateAuthUI();
+        await loadPresets();
+
+      } catch (e) {
+        authErrorMsg.textContent = e.message;
+      } finally {
+        authSubmitBtn.disabled = false;
+      }
+    });
+
+    // プリセット一覧読み込み
+    async function loadPresets() {
+      if (!currentUser) return;
+      presetInfo.textContent = "読込中...";
+
+      try {
+        const response = await fetch(API_BASE_URL + "/presets?userId=" + currentUser.id);
+        if (!response.ok) throw new Error("プリセット取得に失敗しました。");
+        
+        presetsList = await response.json();
+        updatePresetDropdown();
+        presetInfo.textContent = "";
+      } catch (e) {
+        console.error(e);
+        presetInfo.textContent = "エラー";
+      }
+    }
+
+    // プリセットドロップダウン更新
+    function updatePresetDropdown() {
+      presetSelect.innerHTML = '<option value="">-- 選択してください --</option>';
+      presetsList.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (拍/分:${p.startBpm}-${p.maxBpm})`;
+        presetSelect.appendChild(opt);
+      });
+    }
+
+    // プリセット選択時の適用
+    presetSelect.addEventListener('change', (e) => {
+      const selectedId = e.target.value;
+      if (!selectedId) return;
+
+      // プリセット適用時にメトロノームを停止
+      if (isPlaying) stopSession();
+
+      const preset = presetsList.find(p => p.id === selectedId);
+      if (preset) {
+        inputStartBpm.value = preset.startBpm;
+        inputMaxBpm.value = preset.maxBpm;
+        inputAccInterval.value = preset.accInterval;
+        inputAccAmount.value = preset.accAmount;
+
+        // 停止したため、BPM値をプリセットの初期値に更新
+        bpm = preset.startBpm;
+        bpmValInput.value = bpm;
+        bpmSlider.value = bpm;
+        sliderBpmDisplay.textContent = `${bpm} 拍/分`;
+
+        syncParams();
+        statusBar.textContent = `設定「${preset.name}」を適用しました`;
+      }
+    });
+
+    // プリセット新規保存ボタン押下（モーダルを開く）
+    savePresetBtn.addEventListener('click', () => {
+      if (!currentUser) return;
+      newPresetNameInput.value = "加速練習メニュー";
+      savePresetModal.classList.add('show');
+      
+      // 自動フォーカス＆全選択
+      setTimeout(() => {
+        if (newPresetNameInput) {
+          newPresetNameInput.focus();
+          newPresetNameInput.select();
+        }
+      }, 100);
+    });
+
+    // モーダルキャンセル
+    savePresetCancelBtn.addEventListener('click', () => {
+      savePresetModal.classList.remove('show');
+    });
+
+    // モーダルからの保存実行
+    savePresetSubmitBtn.addEventListener('click', async () => {
+      if (!currentUser) return;
+      const name = newPresetNameInput.value.trim();
+      if (!name) {
+        alert("プリセットの名前を入力してください。");
+        return;
+      }
+      if (name.length > 20) {
+        alert("プリセット名は20文字以内で入力してください。");
+        return;
+      }
+
+      savePresetModal.classList.remove('show');
+      syncParams();
+      presetInfo.textContent = "保存中...";
+
+      try {
+        const response = await fetch(API_BASE_URL + "/presets", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            name,
+            startBpm,
+            maxBpm,
+            accInterval,
+            accAmount
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "保存に失敗しました。");
+
+        statusBar.textContent = data.message;
+        await loadPresets();
+        presetSelect.value = data.id;
+
+      } catch (e) {
+        alert(e.message);
+        presetInfo.textContent = "失敗";
+      }
+    });
+
+    // プリセット削除
+    deletePresetBtn.addEventListener('click', async () => {
+      if (!currentUser) return;
+
+      const selectedId = presetSelect.value;
+      if (!selectedId) {
+        alert("削除する設定を選択してください。");
+        return;
+      }
+
+      const preset = presetsList.find(p => p.id === selectedId);
+      if (!preset) return;
+
+      if (!confirm(`設定「${preset.name}」を削除してもよろしいですか？`)) {
+        return;
+      }
+
+      presetInfo.textContent = "削除中...";
+
+      try {
+        const response = await fetch(API_BASE_URL + "/presets/" + selectedId, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "削除に失敗しました。");
+
+        statusBar.textContent = data.message;
+        await loadPresets();
+      } catch (e) {
+        alert(e.message);
+        presetInfo.textContent = "失敗";
+      }
+    });
+
+    // ドキュメント読み込み完了時の処理
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initAuth);
+    } else {
+      initAuth();
+    }
+  </script>
+</body>
+</html>
