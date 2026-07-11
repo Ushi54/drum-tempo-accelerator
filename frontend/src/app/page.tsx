@@ -478,7 +478,7 @@ export default function Home() {
   return (
     <div className="container">
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5px" }}>
-        <h1>TEMPO ACCELERATOR</h1>
+        <h1>DRUM TEMPO ACCELERATOR</h1>
         <div id="authHeader" style={{ fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "8px" }}>
           {currentUser ? (
             <>
