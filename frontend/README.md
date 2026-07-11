@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DRUM TEMPO ACCELERATOR (Next.js Frontend)
+〜ドラム練習の限界を突破する、自動テンポ加速メトロノーム〜
 
-## Getting Started
+本ディレクトリは、自動テンポ加速メトロノームアプリ「DRUM TEMPO ACCELERATOR」の Next.js / TypeScript / React 実装プロジェクトです。
 
-First, run the development server:
+---
 
+## 🚀 起動・開発手順
+
+### 開発サーバーの立ち上げ
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+起動後、ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスします。
+
+### プロダクションビルド
+```bash
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚡ 主な機能・特徴
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **自動テンポ加速システム**: 設定した小節数ごとにテンポが自動でアップ。
+2. **プリセット保存機能**: 練習メニューを名前をつけて個人アカウントに保存。
+3. **スクロール不要のコンパクトUI**: すべてのコントロールが1画面に収まり、練習中の操作ストレスを最小化。
+4. **ヨルシカ風アースカラーデザイン**: 藍色と茜色を基調とした美麗なガラスモフィズムUI。
