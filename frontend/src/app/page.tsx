@@ -790,6 +790,29 @@ export default function Home() {
             現在の練習メニューの設定に名前をつけて保存します
           </p>
 
+          {/* 設定サマリー表示 */}
+          <div style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            padding: "10px 12px",
+            marginBottom: "16px",
+            fontSize: "0.75rem",
+            textAlign: "left",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--text-muted)" }}>テンポ範囲:</span>
+              <span style={{ fontWeight: 700, color: "var(--accent-secondary)" }}>{startBpm} BPM ➔ {maxBpm} BPM</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--text-muted)" }}>加速ルール:</span>
+              <span style={{ fontWeight: 600 }}>{accInterval} 小節ごとに +{accAmount} BPM</span>
+            </div>
+          </div>
+
           <div style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left", marginBottom: "20px" }}>
             <div className="input-box">
               <label htmlFor="newPresetName">プリセット名</label>

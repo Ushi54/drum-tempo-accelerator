@@ -675,6 +675,11 @@
       <h2 class="modal-title">プリセットの保存</h2>
       <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">現在の練習メニューの設定に名前をつけて保存します</p>
       
+      <!-- 設定サマリー表示 -->
+      <div id="savePresetSummaryArea" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 0.75rem; text-align: left; display: flex; flex-direction: column; gap: 6px;">
+        <!-- Dynamic content injected by JS -->
+      </div>
+
       <div style="display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 20px;">
         <div class="input-box">
           <label for="newPresetNameInput">プリセット名</label>
@@ -1371,6 +1376,24 @@
     // プリセット新規保存ボタン押下（モーダルを開く）
     savePresetBtn.addEventListener('click', () => {
       if (!currentUser) return;
+
+      // 設定値を取得してサマリーを更新
+      const sBpm = inputStartBpm.value;
+      const mBpm = inputMaxBpm.value;
+      const interval = inputAccInterval.value;
+      const amount = inputAccAmount.value;
+
+      document.getElementById('savePresetSummaryArea').innerHTML = `
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted)">テンポ範囲:</span>
+          <span style="font-weight: 700; color: var(--accent-secondary)">${sBpm} BPM ➔ ${mBpm} BPM</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted)">加速ルール:</span>
+          <span style="font-weight: 600;">${interval} 小節ごとに +${amount} BPM</span>
+        </div>
+      `;
+
       newPresetNameInput.value = "加速練習メニュー";
       savePresetModal.classList.add('show');
       
