@@ -853,7 +853,7 @@ export default function Home() {
             保存された練習メニューを選択、または削除します
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "240px", overflowY: "auto", paddingRight: "4px", marginBottom: "20px" }}>
+          <div className="no-scrollbar" style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "240px", overflowY: "auto", marginBottom: "20px" }}>
             {presetsList.length === 0 ? (
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", textAlign: "center", padding: "20px" }}>
                 保存されたプリセットがありません

@@ -526,6 +526,17 @@
     .preset-list-item:active {
       transform: scale(0.99);
     }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
   </style>
 </head>
 <body>
@@ -699,7 +710,7 @@
       <h2 class="modal-title">プリセットの選択</h2>
       <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">保存された練習メニューを選択、または削除します</p>
       
-      <div id="presetListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; padding-right: 4px; margin-bottom: 20px;">
+      <div id="presetListContainer" class="no-scrollbar" style="display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; margin-bottom: 20px;">
         <!-- Dynamic content will be injected by JavaScript -->
       </div>
       
