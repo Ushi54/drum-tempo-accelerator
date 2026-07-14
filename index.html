@@ -684,6 +684,7 @@
         <div class="input-box">
           <label for="newPresetNameInput">プリセット名</label>
           <input type="text" id="newPresetNameInput" value="加速練習メニュー" style="width: 100%;" maxlength="20">
+          <div id="savePresetErrorMsg" style="color: #ef4444; font-size: 0.75rem; margin-top: 6px; text-align: left; min-height: 15px;"></div>
         </div>
       </div>
       
@@ -1377,6 +1378,9 @@
     savePresetBtn.addEventListener('click', () => {
       if (!currentUser) return;
 
+      // エラーメッセージ初期化
+      document.getElementById('savePresetErrorMsg').textContent = "";
+
       // 設定値を取得してサマリーを更新
       const sBpm = inputStartBpm.value;
       const mBpm = inputMaxBpm.value;
@@ -1406,6 +1410,11 @@
       }, 100);
     });
 
+    // 入力変更時にエラー表示をクリア
+    newPresetNameInput.addEventListener('input', () => {
+      document.getElementById('savePresetErrorMsg').textContent = "";
+    });
+
     // モーダルキャンセル
     savePresetCancelBtn.addEventListener('click', () => {
       savePresetModal.classList.remove('show');
@@ -1415,19 +1424,20 @@
     savePresetSubmitBtn.addEventListener('click', async () => {
       if (!currentUser) return;
       const name = newPresetNameInput.value.trim();
+      const errorMsgEl = document.getElementById('savePresetErrorMsg');
       if (!name) {
-        showAlert("プリセットの名前を入力してください。");
+        errorMsgEl.textContent = "プリセットの名前を入力してください。";
         return;
       }
       if (name.length > 20) {
-        showAlert("プリセット名は20文字以内で入力してください。");
+        errorMsgEl.textContent = "プリセット名は20文字以内で入力してください。";
         return;
       }
 
       // 重複チェック
       const isDuplicate = presetsList.some(p => p.name.trim() === name);
       if (isDuplicate) {
-        showAlert("同じ名前のプリセットが既に存在します。別の名前を入力してください。");
+        errorMsgEl.textContent = "同じ名前のプリセットが既に存在します。";
         return;
       }
 

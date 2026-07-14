@@ -49,6 +49,7 @@ export default function Home() {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState("加速練習メニュー");
   const [presetListModalOpen, setPresetListModalOpen] = useState(false);
+  const [saveErrorMsg, setSaveErrorMsg] = useState("");
 
   // Custom Alert / Confirm Modal State
   const [customModal, setCustomModal] = useState<{
@@ -431,6 +432,7 @@ export default function Home() {
   const handleSavePresetClick = () => {
     if (!currentUser) return;
     setNewPresetName("加速練習メニュー");
+    setSaveErrorMsg("");
     setSaveModalOpen(true);
   };
 
@@ -438,11 +440,11 @@ export default function Home() {
     if (!currentUser) return;
     const name = newPresetName.trim();
     if (!name) {
-      showAlert("プリセットの名前を入力してください。");
+      setSaveErrorMsg("プリセットの名前を入力してください。");
       return;
     }
     if (name.length > 20) {
-      showAlert("プリセット名は20文字以内で入力してください。");
+      setSaveErrorMsg("プリセット名は20文字以内で入力してください。");
       return;
     }
 
@@ -451,7 +453,7 @@ export default function Home() {
       (p) => p.name.trim() === name
     );
     if (isDuplicate) {
-      showAlert("同じ名前のプリセットが既に存在します。別の名前を入力してください。");
+      setSaveErrorMsg("同じ名前のプリセットが既に存在します。");
       return;
     }
 
@@ -825,7 +827,12 @@ export default function Home() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left", marginBottom: "20px" }}>
             <div className="input-box">
               <label htmlFor="newPresetName">プリセット名</label>
-              <input type="text" id="newPresetName" ref={saveInputRef} value={newPresetName} onChange={(e) => setNewPresetName(e.target.value)} placeholder="例：加速練習メニュー" style={{ width: "100%" }} maxLength={20} />
+              <input type="text" id="newPresetName" ref={saveInputRef} value={newPresetName} onChange={(e) => { setNewPresetName(e.target.value); setSaveErrorMsg(""); }} placeholder="例：加速練習メニュー" style={{ width: "100%" }} maxLength={20} />
+              {saveErrorMsg && (
+                <div style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "6px", textAlign: "left", minHeight: "15px" }}>
+                  {saveErrorMsg}
+                </div>
+              )}
             </div>
           </div>
 
