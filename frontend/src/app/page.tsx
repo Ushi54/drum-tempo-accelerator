@@ -446,6 +446,15 @@ export default function Home() {
       return;
     }
 
+    // 重複チェック
+    const isDuplicate = presetsList.some(
+      (p) => p.name.trim() === name
+    );
+    if (isDuplicate) {
+      showAlert("同じ名前のプリセットが既に存在します。別の名前を入力してください。");
+      return;
+    }
+
     setPresetInfo("保存中...");
     setSaveModalOpen(false);
 
