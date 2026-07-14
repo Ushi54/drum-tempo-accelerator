@@ -1058,7 +1058,7 @@
     });
 
     // --- Java API Integration (Spring Boot Backend) ---
-    const API_BASE_URL = "http://localhost:8080/api";
+    const API_BASE_URL = `http://${window.location.hostname}:8080/api`;
     let currentUser = null;
     let presetsList = [];
     let selectedPresetId = "";

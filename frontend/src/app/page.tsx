@@ -16,7 +16,13 @@ interface User {
   email: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
+const getApiBaseUrl = () => {
+  if (typeof window !== "undefined") {
+    return `http://${window.location.hostname}:8080/api`;
+  }
+  return "http://localhost:8080/api";
+};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || getApiBaseUrl();
 
 export default function Home() {
   // --- React State ---
