@@ -639,7 +639,7 @@ export default function Home() {
         )}
 
         <div className={`param-inputs ${autoAccelerate ? "expanded" : ""}`} id="accParams">
-          <div className="grid-inputs" style={{ marginTop: "5px" }}>
+          <div className="grid-inputs" style={{ gridTemplateColumns: "1fr auto 1fr", gap: "6px", alignItems: "center", marginTop: "5px" }}>
             <div className="input-box">
               <label htmlFor="startBpm">開始 BPM</label>
               <input
@@ -657,6 +657,7 @@ export default function Home() {
                 }}
               />
             </div>
+            <div style={{ color: "var(--text-muted)", fontSize: "1rem", marginTop: "14px", fontWeight: "bold" }}>➔</div>
             <div className="input-box">
               <label htmlFor="maxBpm">目標(限界) BPM</label>
               <input
@@ -691,6 +692,7 @@ export default function Home() {
                 }}
               />
             </div>
+            <div style={{ color: "var(--text-muted)", fontSize: "1rem", marginTop: "14px", fontWeight: "bold" }}>➔</div>
             <div className="input-box">
               <label htmlFor="accAmount">加速量 (+BPM)</label>
               <input
@@ -865,9 +867,11 @@ export default function Home() {
                     <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.name}>
                       {p.name}
                     </span>
-                    <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
-                      BPM:{p.startBpm}-{p.maxBpm} ({p.accInterval}小節 / +{p.accAmount})
-                    </span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                      <span>BPM: <strong style={{ color: "var(--accent-secondary)" }}>{p.startBpm}</strong> ➔ <strong style={{ color: "var(--accent-primary)" }}>{p.maxBpm}</strong></span>
+                      <span style={{ opacity: 0.3 }}>|</span>
+                      <span>{p.accInterval}小節ごとに +{p.accAmount}BPM</span>
+                    </div>
                   </div>
                   <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
                     <button
