@@ -511,3 +511,26 @@ input:checked + .slider:before {
 .modal-btn:active {
   transform: scale(0.97);
 }
+
+/* Preset List Item styling */
+.preset-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.preset-list-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-secondary);
+}
+
+.preset-list-item:active {
+  transform: scale(0.99);
+}

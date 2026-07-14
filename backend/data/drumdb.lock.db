@@ -1,6 +1,6 @@
 #FileLock
-#Sat Jul 11 19:05:07 JST 2026
+#Mon Jul 13 19:00:17 JST 2026
 hostName=mac.elecom
-id=19f50a34e9ee2b928bfa519fcf238eab0e0e824070c
+id=19f5aeb98f32f3900a1bf283330bab3aaf9152f1e6a
 method=file
-server=192.168.2.177\:64683
+server=192.168.2.177\:58541

@@ -48,6 +48,40 @@ export default function Home() {
   const [authErrorMsg, setAuthErrorMsg] = useState("");
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState("加速練習メニュー");
+  const [presetListModalOpen, setPresetListModalOpen] = useState(false);
+
+  // Custom Alert / Confirm Modal State
+  const [customModal, setCustomModal] = useState<{
+    isOpen: boolean;
+    type: "alert" | "confirm";
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: "alert",
+    title: "",
+    message: "",
+  });
+
+  const showAlert = (message: string, title: string = "警告") => {
+    setCustomModal({
+      isOpen: true,
+      type: "alert",
+      title,
+      message,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void, title: string = "確認") => {
+    setCustomModal({
+      isOpen: true,
+      type: "confirm",
+      title,
+      message,
+      onConfirm,
+    });
+  };
 
   // --- Scheduler & Audio Engine Refs ---
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -372,8 +406,7 @@ export default function Home() {
     }
   };
 
-  const handlePresetSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
+  const handlePresetSelect = (selectedId: string) => {
     setSelectedPresetId(selectedId);
     if (!selectedId) return;
 
@@ -392,6 +425,7 @@ export default function Home() {
       bpmRef.current = preset.startBpm;
       setStatusBarHTML(`プリセット「${preset.name}」を適用しました`);
     }
+    setPresetListModalOpen(false);
   };
 
   const handleSavePresetClick = () => {
@@ -404,11 +438,11 @@ export default function Home() {
     if (!currentUser) return;
     const name = newPresetName.trim();
     if (!name) {
-      alert("プリセットの名前を入力してください。");
+      showAlert("プリセットの名前を入力してください。");
       return;
     }
     if (name.length > 20) {
-      alert("プリセット名は20文字以内で入力してください。");
+      showAlert("プリセット名は20文字以内で入力してください。");
       return;
     }
 
@@ -436,43 +470,35 @@ export default function Home() {
       await loadPresets(currentUser.id);
       setSelectedPresetId(data.id);
     } catch (e: any) {
-      alert(e.message || "エラーが発生しました。");
+      showAlert(e.message || "エラーが発生しました。");
       setPresetInfo("失敗");
     }
   };
 
-  const handleDeletePreset = async () => {
+  const handleDeletePreset = async (presetId: string, presetName: string) => {
     if (!currentUser) return;
 
-    if (!selectedPresetId) {
-      alert("削除するプリセットを選択してください。");
-      return;
-    }
+    showConfirm(`プリセット「${presetName}」を削除してもよろしいですか？`, async () => {
+      setPresetInfo("削除中...");
 
-    const preset = presetsList.find((p) => p.id === selectedPresetId);
-    if (!preset) return;
+      try {
+        const response = await fetch(`${API_BASE_URL}/presets/${presetId}`, {
+          method: "DELETE",
+        });
 
-    if (!confirm(`プリセット「${preset.name}」を削除してもよろしいですか？`)) {
-      return;
-    }
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "削除に失敗しました。");
 
-    setPresetInfo("削除中...");
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/presets/${selectedPresetId}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "削除に失敗しました。");
-
-      setStatusBarHTML(data.message || "削除しました。");
-      setSelectedPresetId("");
-      await loadPresets(currentUser.id);
-    } catch (e: any) {
-      alert(e.message || "エラーが発生しました。");
-      setPresetInfo("失敗");
-    }
+        setStatusBarHTML(data.message || "削除しました。");
+        if (selectedPresetId === presetId) {
+          setSelectedPresetId("");
+        }
+        await loadPresets(currentUser.id);
+      } catch (e: any) {
+        showAlert(e.message || "エラーが発生しました。");
+        setPresetInfo("失敗");
+      }
+    });
   };
 
   return (
@@ -566,19 +592,33 @@ export default function Home() {
                 <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)" }}>プリセット選択</label>
                 <span id="presetInfo" style={{ fontSize: "0.7rem", color: "var(--accent-secondary)" }}>{presetInfo}</span>
               </div>
-              <select
-                id="presetSelect"
-                value={selectedPresetId}
-                onChange={handlePresetSelectChange}
-                style={{ width: "100%", background: "rgba(11, 17, 30, 0.6)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "6px", color: "var(--text-main)", fontSize: "0.85rem", outline: "none", WebkitAppearance: "none", MozAppearance: "none", appearance: "none" }}
+              <button
+                type="button"
+                onClick={() => setPresetListModalOpen(true)}
+                style={{
+                  width: "100%",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid var(--border-color)",
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  color: "var(--text-main)",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}
               >
-                <option value="">-- 選択してください --</option>
-                {presetsList.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {`${p.name} (BPM:${p.startBpm}-${p.maxBpm})`}
-                  </option>
-                ))}
-              </select>
+                <span>
+                  {selectedPresetId
+                    ? presetsList.find(p => p.id === selectedPresetId)?.name || "-- 選択してください --"
+                    : "-- 選択してください --"
+                  }
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>▼</span>
+              </button>
             </div>
           ) : (
             <div id="presetPrompt" style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.05)", textAlign: "center", fontSize: "0.7rem", color: "var(--text-muted)" }}>
@@ -660,9 +700,8 @@ export default function Home() {
           </div>
 
           {currentUser && (
-            <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-              <button id="savePresetBtn" onClick={handleSavePresetClick} style={{ flex: 1, background: "var(--accent-primary)", border: "none", color: "#2a2f22", fontWeight: 800, borderRadius: "8px", padding: "8px", fontSize: "0.8rem", cursor: "pointer" }}>設定を保存</button>
-              <button id="deletePresetBtn" onClick={handleDeletePreset} style={{ flex: 1, background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#ef4444", borderRadius: "8px", padding: "8px", fontSize: "0.8rem", cursor: "pointer" }}>選択中を削除</button>
+            <div style={{ marginTop: "12px" }}>
+              <button id="savePresetBtn" onClick={handleSavePresetClick} style={{ width: "100%", background: "var(--accent-primary)", border: "none", color: "#2a2f22", fontWeight: 800, borderRadius: "8px", padding: "8px", fontSize: "0.8rem", cursor: "pointer" }}>設定を保存</button>
             </div>
           )}
         </div>
@@ -764,6 +803,86 @@ export default function Home() {
           <button className="modal-btn" id="savePresetCancelBtn" onClick={() => setSaveModalOpen(false)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid var(--border-color)", color: "var(--text-main)", fontWeight: 700, width: "100%" }}>
             キャンセル
           </button>
+        </div>
+      </div>
+
+      {/* Preset List Modal */}
+      <div className={`modal-overlay ${presetListModalOpen ? "show" : ""}`} id="presetListModal">
+        <div className="modal-card" style={{ maxWidth: "380px" }}>
+          <h2 className="modal-title">プリセットの選択</h2>
+          <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "20px", textAlign: "center" }}>
+            保存された練習メニューを選択、または削除します
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "240px", overflowY: "auto", paddingRight: "4px", marginBottom: "20px" }}>
+            {presetsList.length === 0 ? (
+              <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", textAlign: "center", padding: "20px" }}>
+                保存されたプリセットがありません
+              </div>
+            ) : (
+              presetsList.map((p) => (
+                <div key={p.id} className="preset-list-item" onClick={() => handlePresetSelect(p.id)}>
+                  <div style={{ flex: 1, textAlign: "left", display: "flex", flexDirection: "column", gap: "2px", overflow: "hidden" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.name}>
+                      {p.name}
+                    </span>
+                    <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
+                      BPM:{p.startBpm}-{p.maxBpm} ({p.accInterval}小節 / +{p.accAmount})
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePreset(p.id, p.name);
+                      }}
+                      style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#ef4444", borderRadius: "6px", padding: "6px 10px", fontSize: "0.75rem", cursor: "pointer" }}
+                    >
+                      削除
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <button className="modal-btn" id="presetListCancelBtn" onClick={() => setPresetListModalOpen(false)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid var(--border-color)", color: "var(--text-main)", fontWeight: 700, width: "100%" }}>
+            キャンセル
+          </button>
+        </div>
+      </div>
+
+      {/* Custom Alert/Confirm Modal */}
+      <div className={`modal-overlay ${customModal.isOpen ? "show" : ""}`} id="customPromptModal">
+        <div className="modal-card" style={{ maxWidth: "360px" }}>
+          <h2 className="modal-title">{customModal.title}</h2>
+          <p style={{ fontSize: "0.85rem", color: "var(--text-main)", marginBottom: "20px", textAlign: "center", lineHeight: "1.5" }}>
+            {customModal.message}
+          </p>
+
+          <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+            {customModal.type === "confirm" && (
+              <button
+                className="modal-btn"
+                onClick={() => setCustomModal(prev => ({ ...prev, isOpen: false }))}
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid var(--border-color)", color: "var(--text-main)", fontWeight: 700, flex: 1 }}
+              >
+                キャンセル
+              </button>
+            )}
+            <button
+              className="modal-btn"
+              onClick={() => {
+                setCustomModal(prev => ({ ...prev, isOpen: false }));
+                if (customModal.type === "confirm" && customModal.onConfirm) {
+                  customModal.onConfirm();
+                }
+              }}
+              style={{ flex: 1 }}
+            >
+              {customModal.type === "confirm" ? "実行" : "OK"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

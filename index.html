@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
   
-  
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #0b111e 0%, #152238 60%, #2b1f31 100%); /* 藍色から夕暮れの紫・茜へと移り変わる空 */
@@ -131,14 +130,6 @@
       border-color: var(--accent-secondary);
       box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.6), 
                   0 0 25px rgba(235, 211, 156, 0.3);
-    }
-
-    .bpm-number {
-      font-size: 3.0rem;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--text-main);
-      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
     .bpm-number-input {
@@ -460,32 +451,21 @@
       background: rgba(21, 34, 56, 0.95);
       border: 1px solid var(--border-color);
       border-radius: 24px;
-      padding: 35px 25px;
+      padding: 24px;
       width: 90%;
-      max-width: 380px;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      transform: scale(0.9);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .modal-overlay.show .modal-card {
-      transform: scale(1);
+      position: relative;
     }
 
     .modal-icon {
-      font-size: 3.5rem;
+      font-size: 3rem;
       margin-bottom: 15px;
-      animation: bounce 1s infinite alternate;
-    }
-
-    @keyframes bounce {
-      from { transform: translateY(0); }
-      to { transform: translateY(-10px); }
     }
 
     .modal-title {
-      font-size: 1.6rem;
+      font-size: 1.3rem;
       font-weight: 700;
       background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
       -webkit-background-clip: text;
@@ -524,6 +504,28 @@
       transform: scale(0.97);
     }
 
+    /* Preset List Item styling */
+    .preset-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      gap: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+    }
+
+    .preset-list-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-secondary);
+    }
+
+    .preset-list-item:active {
+      transform: scale(0.99);
+    }
   </style>
 </head>
 <body>
@@ -570,15 +572,17 @@
           <span class="slider"></span>
         </label>
       </div>
+      
       <!-- Preset Selection Panel -->
       <div id="presetArea" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px;">
           <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">プリセット選択</label>
           <span id="presetInfo" style="font-size: 0.7rem; color: var(--accent-secondary);"></span>
         </div>
-        <select id="presetSelect" style="width: 100%; background: rgba(11, 17, 30, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px; color: var(--text-main); font-size: 0.85rem; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none;">
-          <option value="">-- 選択してください --</option>
-        </select>
+        <button type="button" id="openPresetListBtn" style="width: 100%; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-main); font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+          <span id="selectedPresetNameText">-- 選択してください --</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">▼</span>
+        </button>
       </div>
 
       <!-- Non-logged in prompt -->
@@ -605,10 +609,9 @@
             <input type="number" id="accAmount" min="1" max="50" value="5">
           </div>
         </div>
-        <!-- ログイン時のみ表示する保存/削除ボタン -->
-        <div id="presetBtnArea" style="display: none; gap: 8px; margin-top: 12px;">
-          <button id="savePresetBtn" style="flex: 1; background: var(--accent-primary); border: none; color: #2a2f22; font-weight: 800; border-radius: 8px; padding: 8px; font-size: 0.8rem; cursor: pointer;">設定を保存</button>
-          <button id="deletePresetBtn" style="flex: 1; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 8px; padding: 8px; font-size: 0.8rem; cursor: pointer;">選択中を削除</button>
+        <!-- ログイン時のみ表示する保存ボタン -->
+        <div id="presetBtnArea" style="display: none; margin-top: 12px;">
+          <button id="savePresetBtn" style="width: 100%; background: var(--accent-primary); border: none; color: #2a2f22; font-weight: 800; border-radius: 8px; padding: 8px; font-size: 0.8rem; cursor: pointer;">設定を保存</button>
         </div>
       </div>
     </div>
@@ -637,6 +640,7 @@
       <button class="modal-btn" id="modalCloseBtn">閉じる</button>
     </div>
   </div>
+  
   <!-- Auth Modal -->
   <div class="modal-overlay" id="authModal">
     <div class="modal-card" style="max-width: 360px;">
@@ -682,6 +686,42 @@
       <button class="modal-btn" id="savePresetCancelBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 700; width: 100%;">キャンセル</button>
     </div>
   </div>
+
+  <!-- Preset List Modal -->
+  <div class="modal-overlay" id="presetListModal">
+    <div class="modal-card" style="max-width: 380px;">
+      <h2 class="modal-title">プリセットの選択</h2>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">保存された練習メニューを選択、または削除します</p>
+      
+      <div id="presetListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; padding-right: 4px; margin-bottom: 20px;">
+        <!-- Dynamic content will be injected by JavaScript -->
+      </div>
+      
+      <button class="modal-btn" id="presetListCancelBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 700; width: 100%;">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div class="modal-overlay" id="customAlertModal">
+    <div class="modal-card" style="max-width: 360px;">
+      <h2 class="modal-title" id="customAlertTitle">警告</h2>
+      <p class="modal-message" id="customAlertMessage" style="margin-bottom: 20px; font-size: 0.85rem; text-align: center; line-height: 1.5;"></p>
+      <button class="modal-btn" id="customAlertOkBtn">OK</button>
+    </div>
+  </div>
+
+  <!-- Custom Confirm Modal -->
+  <div class="modal-overlay" id="customConfirmModal">
+    <div class="modal-card" style="max-width: 360px;">
+      <h2 class="modal-title" id="customConfirmTitle">確認</h2>
+      <p class="modal-message" id="customConfirmMessage" style="margin-bottom: 20px; font-size: 0.85rem; text-align: center; line-height: 1.5;"></p>
+      <div style="display: flex; gap: 10px; width: 100%;">
+        <button class="modal-btn" id="customConfirmCancelBtn" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-main); font-weight: 700; flex: 1;">キャンセル</button>
+        <button class="modal-btn" id="customConfirmOkBtn" style="flex: 1;">実行</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // --- Web Audio API Scheduler Engine ---
     let audioCtx = null;
@@ -733,6 +773,13 @@
     const newPresetNameInput = document.getElementById('newPresetNameInput');
     const savePresetSubmitBtn = document.getElementById('savePresetSubmitBtn');
     const savePresetCancelBtn = document.getElementById('savePresetCancelBtn');
+
+    // Preset List Modal Elements
+    const openPresetListBtn = document.getElementById('openPresetListBtn');
+    const selectedPresetNameText = document.getElementById('selectedPresetNameText');
+    const presetListModal = document.getElementById('presetListModal');
+    const presetListContainer = document.getElementById('presetListContainer');
+    const presetListCancelBtn = document.getElementById('presetListCancelBtn');
 
     // UI: Toggle auto acceleration panel
     autoAccToggle.addEventListener('change', (e) => {
@@ -848,25 +895,26 @@
     }
 
     function scheduleNote(beatNumber, time) {
-      // Push note to queue for graphic synchronization
+      // push note event for UI beat animation syncing
       notesInQueue.push({ note: beatNumber, time: time });
       
+      // create audio source
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       
       osc.connect(gainNode);
       gainNode.connect(audioCtx.destination);
       
-      // Drum pad friendly click pitch: High click for downbeat, mid click for offbeats
+      // click sound pitch differentiation (first beat vs others)
       if (beatNumber === 0) {
-        osc.frequency.setValueAtTime(1200, time); // High pitched bell-like beat
+        osc.frequency.value = 1000; // high accent click
+        gainNode.gain.setValueAtTime(0.4, time);
       } else {
-        osc.frequency.setValueAtTime(800, time); // Normal tick
+        osc.frequency.value = 600;  // low click
+        gainNode.gain.setValueAtTime(0.2, time);
       }
       
-      // Tight volume envelope (Short click)
-      gainNode.gain.setValueAtTime(1.0, time);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05); // decay
+      gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
       
       osc.start(time);
       osc.stop(time + 0.06);
@@ -880,61 +928,45 @@
       timerID = setTimeout(scheduler, lookahead);
     }
 
-    // --- Audio-Visual Synchronization Engine ---
-    let lastBeatDrawn = -1;
+    // --- UI Beat Animation Engine ---
+    let lastDrawTime = -1;
     
-    function draw() {
+    function drawBeatIndicators() {
       if (!isPlaying) return;
       
-      let currentTime = audioCtx.currentTime;
+      const currentTime = audioCtx.currentTime;
       
-      // Keep checking notes queue
-      while (notesInQueue.length && notesInQueue[0].time < currentTime) {
-        const activeBeatInfo = notesInQueue.shift();
-        lastBeatDrawn = activeBeatInfo.note;
+      while (notesInQueue.length > 0 && notesInQueue[0].time < currentTime) {
+        const activeNote = notesInQueue[0].note;
+        lastDrawTime = notesInQueue[0].time;
+        notesInQueue.shift();
         
-        // Trigger neon glows for dots
-        updateVisualBeats(lastBeatDrawn);
-      }
-      
-      requestAnimationFrame(draw);
-    }
-    
-    function updateVisualBeats(beatNum) {
-      // Clear previous active states
-      for (let i = 0; i < beatsPerMeasure; i++) {
-        const dot = document.getElementById(`dot-${i}`);
-        dot.className = 'dot';
-      }
-      
-      // Trigger new glow and outer ring animation
-      const activeDot = document.getElementById(`dot-${beatNum}`);
-      if (beatNum === 0) {
-        activeDot.classList.add('active-beat-1');
+        // visual beat dot animation triggering
+        for (let i = 0; i < beatsPerMeasure; i++) {
+          const dot = document.getElementById(`dot-${i}`);
+          dot.className = 'dot'; // reset
+          if (i === activeNote) {
+            dot.classList.add(i === 0 ? 'active-beat-1' : 'active-beat-other');
+          }
+        }
         
-        bpmRing.className = 'bpm-ring-outer active-accent-1';
+        // visual BPM ring pulse feedback
+        bpmRing.classList.remove('active-accent-1', 'active-accent-other');
+        bpmRing.classList.add(activeNote === 0 ? 'active-accent-1' : 'active-accent-other');
         setTimeout(() => {
-          if(isPlaying) bpmRing.className = 'bpm-ring-outer';
+          bpmRing.classList.remove('active-accent-1', 'active-accent-other');
         }, 120);
-      } else {
-        activeDot.classList.add('active-beat-other');
-        
-        bpmRing.className = 'bpm-ring-outer active-accent-other';
-        setTimeout(() => {
-          if(isPlaying) bpmRing.className = 'bpm-ring-outer';
-        }, 80);
       }
+      
+      animationFrameRef = requestAnimationFrame(drawBeatIndicators);
     }
 
-    // --- Session Control ---
+    // --- Audio Session Control ---
     function startSession() {
+      if (isPlaying) return;
+      
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      
-      // Resume context if suspended (browser security requirement)
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
       }
       
       isPlaying = true;
@@ -947,44 +979,53 @@
         bpmValInput.value = bpm;
         bpmSlider.value = bpm;
         sliderBpmDisplay.textContent = `${bpm} 拍/分`;
-        statusBar.innerHTML = `加速練習開始: <span>${startBpm} 拍/分</span>`;
+        statusBar.innerHTML = `加速中: 目標 <span>${maxBpm} 拍/分</span> (現在: ${bpm} 拍/分)`;
       } else {
-        bpm = parseInt(bpmSlider.value);
-        statusBar.textContent = "標準練習モード";
+        statusBar.textContent = "標準メトロノーム駆動中";
       }
       
       nextNoteTime = audioCtx.currentTime + 0.05;
       
-      // UI State Shift
+      // Start scheduling loop
+      scheduler();
+      
+      // Start animation loop
+      drawBeatIndicators();
+      
+      // Button UI toggle
       playBtn.classList.add('playing');
       playIcon.style.display = 'none';
       stopIcon.style.display = 'block';
-      btnText.textContent = '練習を停止';
-      
-      scheduler();
-      requestAnimationFrame(draw);
+      btnText.textContent = 'STOP SESSION';
     }
 
     function stopSession() {
+      if (!isPlaying) return;
+      
       isPlaying = false;
       clearTimeout(timerID);
+      cancelAnimationFrame(animationFrameRef);
       
-      // UI Reset
-      playBtn.classList.remove('playing');
-      playIcon.style.display = 'block';
-      stopIcon.style.display = 'none';
-      btnText.textContent = '練習を開始';
-      statusBar.textContent = "";
-      bpmRing.className = 'bpm-ring-outer';
-      
-      // Clear visual dots
+      // Clear visual states
       for (let i = 0; i < beatsPerMeasure; i++) {
         document.getElementById(`dot-${i}`).className = 'dot';
       }
+      bpmRing.classList.remove('active-accent-1', 'active-accent-other');
       
-      notesInQueue.length = 0; // Clear queue
+      if (autoAccelerate) {
+        statusBar.textContent = "加速モード停止中";
+      } else {
+        statusBar.textContent = "標準テンポモード";
+      }
+      
+      // Button UI reset
+      playBtn.classList.remove('playing');
+      playIcon.style.display = 'block';
+      stopIcon.style.display = 'none';
+      btnText.textContent = 'START SESSION';
     }
 
+    // Handle master Play button
     playBtn.addEventListener('click', () => {
       if (isPlaying) {
         stopSession();
@@ -1001,6 +1042,7 @@
     const API_BASE_URL = "http://localhost:8080/api";
     let currentUser = null;
     let presetsList = [];
+    let selectedPresetId = "";
 
     // モーダル要素
     const authModal = document.getElementById('authModal');
@@ -1016,12 +1058,54 @@
     const authHeader = document.getElementById('authHeader');
     const presetArea = document.getElementById('presetArea');
     const presetPrompt = document.getElementById('presetPrompt');
-    const presetSelect = document.getElementById('presetSelect');
     const savePresetBtn = document.getElementById('savePresetBtn');
-    const deletePresetBtn = document.getElementById('deletePresetBtn');
     const presetInfo = document.getElementById('presetInfo');
 
     let authMode = 'login'; // 'login' or 'signup'
+
+    // --- Custom Prompt Modals Helper ---
+    let confirmCallback = null;
+
+    const customAlertModal = document.getElementById('customAlertModal');
+    const customAlertTitle = document.getElementById('customAlertTitle');
+    const customAlertMessage = document.getElementById('customAlertMessage');
+    const customAlertOkBtn = document.getElementById('customAlertOkBtn');
+
+    const customConfirmModal = document.getElementById('customConfirmModal');
+    const customConfirmTitle = document.getElementById('customConfirmTitle');
+    const customConfirmMessage = document.getElementById('customConfirmMessage');
+    const customConfirmCancelBtn = document.getElementById('customConfirmCancelBtn');
+    const customConfirmOkBtn = document.getElementById('customConfirmOkBtn');
+
+    function showAlert(message, title = "警告") {
+      customAlertTitle.textContent = title;
+      customAlertMessage.textContent = message;
+      customAlertModal.classList.add('show');
+    }
+
+    function showConfirm(message, callback, title = "確認") {
+      customConfirmTitle.textContent = title;
+      customConfirmMessage.textContent = message;
+      confirmCallback = callback;
+      customConfirmModal.classList.add('show');
+    }
+
+    customAlertOkBtn.addEventListener('click', () => {
+      customAlertModal.classList.remove('show');
+    });
+
+    customConfirmCancelBtn.addEventListener('click', () => {
+      customConfirmModal.classList.remove('show');
+      confirmCallback = null;
+    });
+
+    customConfirmOkBtn.addEventListener('click', () => {
+      customConfirmModal.classList.remove('show');
+      if (confirmCallback) {
+        confirmCallback();
+      }
+      confirmCallback = null;
+    });
 
     // 起動時の初期化
     function initAuth() {
@@ -1056,7 +1140,7 @@
         if (currentUser) {
           presetArea.style.display = 'block';
           presetPrompt.style.display = 'none';
-          presetBtnArea.style.display = 'flex';
+          presetBtnArea.style.display = 'block';
         } else {
           presetArea.style.display = 'none';
           presetPrompt.style.display = 'block';
@@ -1085,7 +1169,9 @@
       localStorage.removeItem('drum_user_email');
       updateAuthUI();
       presetsList = [];
-      updatePresetDropdown();
+      selectedPresetId = "";
+      selectedPresetNameText.textContent = "-- 選択してください --";
+      renderPresetList();
       statusBar.textContent = "ログアウトしました。";
     }
 
@@ -1164,7 +1250,7 @@
         if (!response.ok) throw new Error("プリセット取得に失敗しました。");
         
         presetsList = await response.json();
-        updatePresetDropdown();
+        renderPresetList();
         presetInfo.textContent = "";
       } catch (e) {
         console.error(e);
@@ -1172,23 +1258,56 @@
       }
     }
 
-    // プリセットドロップダウン更新
-    function updatePresetDropdown() {
-      presetSelect.innerHTML = '<option value="">-- 選択してください --</option>';
+    // プリセット一覧モーダルリストの描画
+    function renderPresetList() {
+      presetListContainer.innerHTML = "";
+      if (presetsList.length === 0) {
+        presetListContainer.innerHTML = `
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 20px;">
+            保存されたプリセットがありません
+          </div>
+        `;
+        return;
+      }
+
       presetsList.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = `${p.name} (拍/分:${p.startBpm}-${p.maxBpm})`;
-        presetSelect.appendChild(opt);
+        const item = document.createElement('div');
+        item.className = 'preset-list-item';
+
+        item.innerHTML = `
+          <div style="flex: 1; text-align: left; display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.name}">
+              ${p.name}
+            </span>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">
+              BPM:${p.startBpm}-${p.maxBpm} (${p.accInterval}小節 / +${p.accAmount})
+            </span>
+          </div>
+          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            <button class="delete-btn" data-id="${p.id}" data-name="${p.name}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 6px; padding: 6px 10px; font-size: 0.75rem; cursor: pointer;">削除</button>
+          </div>
+        `;
+
+        // 行全体クリックで適用
+        item.addEventListener('click', () => {
+          applyPreset(p.id);
+        });
+
+        // 削除ボタンのリスナー (バブリング防止)
+        item.querySelector('.delete-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deletePreset(p.id, p.name);
+        });
+
+        presetListContainer.appendChild(item);
       });
     }
 
-    // プリセット選択時の適用
-    presetSelect.addEventListener('change', (e) => {
-      const selectedId = e.target.value;
-      if (!selectedId) return;
+    // プリセット適用
+    function applyPreset(selectedId) {
+      selectedPresetId = selectedId;
+      presetListModal.classList.remove('show');
 
-      // プリセット適用時にメトロノームを停止
       if (isPlaying) stopSession();
 
       const preset = presetsList.find(p => p.id === selectedId);
@@ -1202,11 +1321,51 @@
         bpm = preset.startBpm;
         bpmValInput.value = bpm;
         bpmSlider.value = bpm;
-        sliderBpmDisplay.textContent = `${bpm} 拍/分`;
+        sliderBpmDisplay.textContent = `${bpm} BPM`;
 
         syncParams();
-        statusBar.textContent = `設定「${preset.name}」を適用しました`;
+        selectedPresetNameText.textContent = preset.name;
+        statusBar.textContent = `プリセット「${preset.name}」を適用しました`;
       }
+    }
+
+    // プリセット削除
+    async function deletePreset(presetId, presetName) {
+      if (!currentUser) return;
+      showConfirm(`プリセット「${presetName}」を削除してもよろしいですか？`, async () => {
+        presetInfo.textContent = "削除中...";
+
+        try {
+          const response = await fetch(API_BASE_URL + "/presets/" + presetId, {
+            method: 'DELETE'
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || "削除に失敗しました。");
+
+          statusBar.textContent = data.message;
+          if (selectedPresetId === presetId) {
+            selectedPresetId = "";
+            selectedPresetNameText.textContent = "-- 選択してください --";
+          }
+          await loadPresets();
+        } catch (e) {
+          showAlert(e.message);
+          presetInfo.textContent = "失敗";
+        }
+      });
+    }
+
+    // プリセット選択モーダルを開く
+    openPresetListBtn.addEventListener('click', () => {
+      if (!currentUser) return;
+      renderPresetList();
+      presetListModal.classList.add('show');
+    });
+
+    // プリセット選択モーダル閉じる
+    presetListCancelBtn.addEventListener('click', () => {
+      presetListModal.classList.remove('show');
     });
 
     // プリセット新規保存ボタン押下（モーダルを開く）
@@ -1234,11 +1393,11 @@
       if (!currentUser) return;
       const name = newPresetNameInput.value.trim();
       if (!name) {
-        alert("プリセットの名前を入力してください。");
+        showAlert("プリセットの名前を入力してください。");
         return;
       }
       if (name.length > 20) {
-        alert("プリセット名は20文字以内で入力してください。");
+        showAlert("プリセット名は20文字以内で入力してください。");
         return;
       }
 
@@ -1265,45 +1424,10 @@
 
         statusBar.textContent = data.message;
         await loadPresets();
-        presetSelect.value = data.id;
+        applyPreset(data.id);
 
       } catch (e) {
-        alert(e.message);
-        presetInfo.textContent = "失敗";
-      }
-    });
-
-    // プリセット削除
-    deletePresetBtn.addEventListener('click', async () => {
-      if (!currentUser) return;
-
-      const selectedId = presetSelect.value;
-      if (!selectedId) {
-        alert("削除する設定を選択してください。");
-        return;
-      }
-
-      const preset = presetsList.find(p => p.id === selectedId);
-      if (!preset) return;
-
-      if (!confirm(`設定「${preset.name}」を削除してもよろしいですか？`)) {
-        return;
-      }
-
-      presetInfo.textContent = "削除中...";
-
-      try {
-        const response = await fetch(API_BASE_URL + "/presets/" + selectedId, {
-          method: 'DELETE'
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "削除に失敗しました。");
-
-        statusBar.textContent = data.message;
-        await loadPresets();
-      } catch (e) {
-        alert(e.message);
+        showAlert(e.message);
         presetInfo.textContent = "失敗";
       }
     });
