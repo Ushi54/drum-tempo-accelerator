@@ -16,7 +16,7 @@ public interface PresetMapper {
             "VALUES (#{id}, #{userId}, #{name}, #{startBpm}, #{maxBpm}, #{accInterval}, #{accAmount})")
     void insertPreset(PresetEntity preset);
 
-    @Select("SELECT * FROM presets WHERE user_id = #{userId} ORDER BY name ASC")
+    @Select("SELECT * FROM presets WHERE CAST(user_id AS VARCHAR) = #{userId} ORDER BY name ASC")
     List<PresetEntity> findByUserId(@Param("userId") String userId);
 
     @Delete("DELETE FROM presets WHERE id = #{id}")

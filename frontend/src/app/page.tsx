@@ -228,31 +228,35 @@ export default function Home() {
 
   // --- Session Control ---
   const startSession = () => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+
+      if (audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+
+      setIsPlaying(true);
+      currentBeatRef.current = 0;
+      measureCountRef.current = 0;
+      notesInQueueRef.current = [];
+
+      if (autoAccelerateRef.current) {
+        const startingBpm = startBpmRef.current;
+        setBpm(startingBpm);
+        bpmRef.current = startingBpm;
+        setStatusBarHTML(`加速セッション開始: <span>${startingBpm} BPM</span>`);
+      } else {
+        setStatusBarHTML("標準メトロノームセッション");
+      }
+
+      nextNoteTimeRef.current = audioCtxRef.current.currentTime + 0.05;
+      scheduler();
+      animationFrameRef.current = requestAnimationFrame(draw);
+    } catch (e: any) {
+      window.alert("startSession Error: " + e.message + "\nStack: " + e.stack);
     }
-
-    if (audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
-    }
-
-    setIsPlaying(true);
-    currentBeatRef.current = 0;
-    measureCountRef.current = 0;
-    notesInQueueRef.current = [];
-
-    if (autoAccelerateRef.current) {
-      const startingBpm = startBpmRef.current;
-      setBpm(startingBpm);
-      bpmRef.current = startingBpm;
-      setStatusBarHTML(`加速セッション開始: <span>${startingBpm} BPM</span>`);
-    } else {
-      setStatusBarHTML("標準メトロノームセッション");
-    }
-
-    nextNoteTimeRef.current = audioCtxRef.current.currentTime + 0.05;
-    scheduler();
-    animationFrameRef.current = requestAnimationFrame(draw);
   };
 
   const stopSession = () => {
@@ -272,11 +276,15 @@ export default function Home() {
   };
 
   const handlePlayBtnClick = () => {
-    if (isPlaying) {
-      stopSession();
-      setStatusBarHTML(autoAccelerate ? `加速モード準備完了: ${startBpm}BPM ➔ ${maxBpm}BPM` : "標準メトロノームモード");
-    } else {
-      startSession();
+    try {
+      if (isPlaying) {
+        stopSession();
+        setStatusBarHTML(autoAccelerate ? `加速モード準備完了: ${startBpm}BPM ➔ ${maxBpm}BPM` : "標準メトロノームモード");
+      } else {
+        startSession();
+      }
+    } catch (e: any) {
+      window.alert("Play Error: " + e.message + "\nStack: " + e.stack);
     }
   };
 
