@@ -18,4 +18,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # アプリケーションの起動
-ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+ENTRYPOINT sh -c 'java -Dserver.port=${PORT} -jar app.jar'
