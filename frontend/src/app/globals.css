@@ -405,20 +405,7 @@ input:checked + .slider:before {
   height: 18px;
 }
 
-/* Status Bar info */
-.status-bar {
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  min-height: 15px;
-  flex-shrink: 0;
-  margin-top: 8px;
-}
 
-.status-bar span {
-  font-weight: 600;
-  color: var(--accent-tertiary);
-}
 
 /* Custom Modal styling for mobile app feel */
 .modal-overlay {

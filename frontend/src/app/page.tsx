@@ -45,7 +45,6 @@ export default function Home() {
   const [presetsList, setPresetsList] = useState<Preset[]>([]);
   const [selectedPresetId, setSelectedPresetId] = useState("");
   const [presetInfo, setPresetInfo] = useState("");
-  const [statusBarHTML, setStatusBarHTML] = useState("標準メトロノームモード");
 
   // Modals
   const [achievementModalOpen, setAchievementModalOpen] = useState(false);
@@ -193,13 +192,11 @@ export default function Home() {
 
             // Smooth state updates
             setBpm(nextBpm);
-            setStatusBarHTML(`テンポアップ！ <span>${oldBpm} ➔ ${nextBpm} BPM</span>`);
             setRingPulseClass("active-accent-1");
             setTimeout(() => setRingPulseClass(""), 150);
           } else {
             // Target BPM reached
             stopSession();
-            setStatusBarHTML(`🎉 <span>目標達成！お疲れ様でした！</span>`);
             setAchievementModalOpen(true);
           }
         }
@@ -290,9 +287,7 @@ export default function Home() {
         const startingBpm = startBpmRef.current;
         setBpm(startingBpm);
         bpmRef.current = startingBpm;
-        setStatusBarHTML(`加速セッション開始: <span>${startingBpm} BPM</span>`);
       } else {
-        setStatusBarHTML("標準メトロノームセッション");
       }
 
       nextNoteTimeRef.current = audioCtxRef.current.currentTime + 0.05;
@@ -324,7 +319,6 @@ export default function Home() {
     try {
       if (isPlaying) {
         stopSession();
-        setStatusBarHTML(autoAccelerate ? `加速モード準備完了: ${startBpm}BPM ➔ ${maxBpm}BPM` : "標準メトロノームモード");
       } else {
         startSession();
       }
@@ -378,9 +372,7 @@ export default function Home() {
     const checked = e.target.checked;
     setAutoAccelerate(checked);
     if (checked) {
-      setStatusBarHTML(`加速モード準備完了: ${startBpm}BPM ➔ ${maxBpm}BPM`);
     } else {
-      setStatusBarHTML("標準メトロノームモード");
     }
   };
 
@@ -425,7 +417,6 @@ export default function Home() {
     setCurrentUser(null);
     localStorage.removeItem("drum_user_id");
     localStorage.removeItem("drum_user_email");
-    setStatusBarHTML("標準メトロノームモード");
     setLogoutConfirmModalOpen(false);
     showToast("ログアウト成功しました！");
   };
@@ -472,7 +463,6 @@ export default function Home() {
       localStorage.setItem("drum_user_id", data.id);
       localStorage.setItem("drum_user_email", data.email);
       setAuthModalOpen(false);
-      setStatusBarHTML(data.message || "ログインしました。");
       
       if (authMode === "login") {
         showToast("ログインに成功しました！");
@@ -506,7 +496,6 @@ export default function Home() {
       // 停止したため、BPM値をプリセットの初期値に更新
       setBpm(preset.startBpm);
       bpmRef.current = preset.startBpm;
-      setStatusBarHTML(`プリセット「${preset.name}」を適用しました`);
     }
     setPresetListModalOpen(false);
   };
@@ -560,7 +549,6 @@ export default function Home() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "保存に失敗しました。");
 
-      setStatusBarHTML(data.message || "保存しました。");
       await loadPresets(currentUser.id);
       setSelectedPresetId(data.id);
     } catch (e: any) {
@@ -583,7 +571,6 @@ export default function Home() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "削除に失敗しました。");
 
-        setStatusBarHTML(data.message || "削除しました。");
         if (selectedPresetId === presetId) {
           setSelectedPresetId("");
         }
@@ -866,7 +853,6 @@ export default function Home() {
         )}
       </button>
 
-      <div className="status-bar" id="statusBar" dangerouslySetInnerHTML={{ __html: statusBarHTML }} />
 
       {/* Achievement Modal */}
       <div className={`modal-overlay ${achievementModalOpen ? "show" : ""}`} id="achievementModal">
