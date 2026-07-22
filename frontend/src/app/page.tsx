@@ -59,6 +59,23 @@ export default function Home() {
   const [newPresetName, setNewPresetName] = useState("加速練習メニュー");
   const [presetListModalOpen, setPresetListModalOpen] = useState(false);
   const [saveErrorMsg, setSaveErrorMsg] = useState("");
+  const [logoutConfirmModalOpen, setLogoutConfirmModalOpen] = useState(false);
+
+  // Toast
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setToastVisible(true);
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastVisible(false);
+    }, 3000);
+  };
 
   // Custom Alert / Confirm Modal State
   const [customModal, setCustomModal] = useState<{
@@ -399,12 +416,18 @@ export default function Home() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setLogoutConfirmModalOpen(true);
+  };
+
+  const executeLogout = () => {
     if (isPlaying) stopSession();
     setCurrentUser(null);
     localStorage.removeItem("drum_user_id");
     localStorage.removeItem("drum_user_email");
-    setStatusBarHTML("ログアウトしました。");
+    setStatusBarHTML("標準メトロノームモード");
+    setLogoutConfirmModalOpen(false);
+    showToast("ログアウト成功しました！");
   };
 
   const openAuthFlow = () => {
@@ -450,6 +473,12 @@ export default function Home() {
       localStorage.setItem("drum_user_email", data.email);
       setAuthModalOpen(false);
       setStatusBarHTML(data.message || "ログインしました。");
+      
+      if (authMode === "login") {
+        showToast("ログインに成功しました！");
+      } else {
+        showToast("アカウントを作成しました！");
+      }
     } catch (e: any) {
       setAuthErrorMsg(e.message || "エラーが発生しました。");
     }
@@ -576,7 +605,7 @@ export default function Home() {
               <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", textOverflow: "ellipsis", overflow: "hidden", maxWidth: "100px", whiteSpace: "nowrap" }}>
                 {currentUser.email}
               </span>
-              <button id="logoutBtn" onClick={handleLogout} style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#ef4444", borderRadius: "8px", padding: "4px 8px", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer" }}>
+              <button id="logoutBtn" onClick={handleLogoutClick} style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#ef4444", borderRadius: "8px", padding: "4px 8px", fontSize: "0.7rem", fontWeight: 600, cursor: "pointer" }}>
                 OUT
               </button>
             </>
@@ -899,6 +928,29 @@ export default function Home() {
             {authErrorMsg}
           </div>
         </div>
+      </div>
+
+      {/* Logout Confirm Modal */}
+      <div className={`modal-overlay ${logoutConfirmModalOpen ? "show" : ""}`} id="logoutConfirmModal">
+        <div className="modal-card" style={{ maxWidth: "320px", textAlign: "center" }}>
+          <h2 className="modal-title">確認</h2>
+          <p className="modal-message" style={{ marginBottom: "24px" }}>
+            ログアウトしますか？
+          </p>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button className="modal-btn" onClick={() => setLogoutConfirmModalOpen(false)} style={{ flex: 1, background: "rgba(255,255,255,0.1)", color: "var(--text-main)" }}>
+              キャンセル
+            </button>
+            <button className="modal-btn" onClick={executeLogout} style={{ flex: 1, background: "var(--accent-primary)" }}>
+              ログアウト
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Toast Popup */}
+      <div className={`toast-popup ${toastVisible ? "show" : ""}`}>
+        {toastMsg}
       </div>
 
       {/* Save Preset Modal */}
