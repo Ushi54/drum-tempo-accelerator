@@ -53,6 +53,7 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authConfirmPassword, setAuthConfirmPassword] = useState("");
   const [authErrorMsg, setAuthErrorMsg] = useState("");
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState("加速練習メニュー");
@@ -410,6 +411,7 @@ export default function Home() {
     setAuthErrorMsg("");
     setAuthEmail("");
     setAuthPassword("");
+    setAuthConfirmPassword("");
     setAuthMode("login");
     setAuthModalOpen(true);
   };
@@ -420,6 +422,11 @@ export default function Home() {
 
     if (!email || !password) {
       setAuthErrorMsg("メールアドレスとパスワードを入力してください。");
+      return;
+    }
+
+    if (authMode === "signup" && password !== authConfirmPassword) {
+      setAuthErrorMsg("パスワードと確認用パスワードが一致しません。");
       return;
     }
 
@@ -859,6 +866,12 @@ export default function Home() {
               <label htmlFor="authPassword">パスワード</label>
               <input type="password" id="authPassword" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="••••••••" style={{ width: "100%" }} />
             </div>
+            {authMode === "signup" && (
+              <div className="input-box">
+                <label htmlFor="authConfirmPassword">パスワード (確認用)</label>
+                <input type="password" id="authConfirmPassword" value={authConfirmPassword} onChange={(e) => setAuthConfirmPassword(e.target.value)} placeholder="••••••••" style={{ width: "100%" }} />
+              </div>
+            )}
           </div>
 
           <button className="modal-btn" id="authSubmitBtn" onClick={handleAuthSubmit} style={{ marginBottom: "12px" }}>
@@ -871,6 +884,7 @@ export default function Home() {
               onClick={() => {
                 setAuthMode(authMode === "login" ? "signup" : "login");
                 setAuthErrorMsg("");
+                setAuthConfirmPassword("");
               }}
               style={{ cursor: "pointer", textDecoration: "underline", color: "var(--accent-secondary)" }}
             >
