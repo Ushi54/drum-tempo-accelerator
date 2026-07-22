@@ -624,15 +624,44 @@ export default function Home() {
       <div className="controls-panel">
         <div className="panel-row">
           <div className="label-group">
-            <span className="field-title">自動テンポ加速モード</span>
-            <span className="field-desc">練習中に徐々にテンポを上げて負荷をかけます</span>
+            <span className="field-title">自動テンポ加速 (小節ベース)</span>
+            <span className="field-desc">指定した小節ごとにテンポを上げます</span>
           </div>
           <label className="switch">
             <input
               type="checkbox"
-              id="autoAccToggle"
-              checked={autoAccelerate}
-              onChange={handleAutoAccToggleChange}
+              checked={autoAccelerate && accMode === "bars"}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setAccMode("bars");
+                  setAutoAccelerate(true);
+                } else {
+                  setAutoAccelerate(false);
+                }
+              }}
+            />
+            <span className="slider"></span>
+          </label>
+        </div>
+
+        <div className="panel-row">
+          <div className="label-group">
+            <span className="field-title">自動テンポ加速 (時間ベース) ⏱️</span>
+            <span className="field-desc">指定した秒数ごとにテンポを上げます</span>
+          </div>
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={autoAccelerate && accMode === "time"}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setAccMode("time");
+                  setAutoAccelerate(true);
+                  if (!currentUser) setAccInterval(10);
+                } else {
+                  setAutoAccelerate(false);
+                }
+              }}
             />
             <span className="slider"></span>
           </label>
@@ -681,26 +710,6 @@ export default function Home() {
         )}
 
         <div className={`param-inputs ${autoAccelerate ? "expanded" : ""}`} id="accParams">
-          <div style={{ display: "flex", gap: "10px", marginBottom: "12px", background: "rgba(0,0,0,0.2)", padding: "4px", borderRadius: "8px" }}>
-            <button
-              onClick={() => setAccMode("bars")}
-              style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", background: accMode === "bars" ? "var(--accent-primary)" : "transparent", color: accMode === "bars" ? "#2a2f22" : "var(--text-muted)", transition: "all 0.2s" }}
-            >
-              小節ごと
-            </button>
-            <button
-              onClick={() => {
-                setAccMode("time");
-                if (!currentUser) {
-                  setAccInterval(10);
-                }
-              }}
-              style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", background: accMode === "time" ? "var(--accent-primary)" : "transparent", color: accMode === "time" ? "#2a2f22" : "var(--text-muted)", transition: "all 0.2s" }}
-            >
-              時間（秒）ごと
-            </button>
-          </div>
-          
           {accMode === "time" && !currentUser && (
             <div style={{ fontSize: "0.7rem", color: "var(--accent-secondary)", textAlign: "center", marginBottom: "8px" }}>
               🔒 無料版は10秒固定です（有料版で自由に設定可能）
