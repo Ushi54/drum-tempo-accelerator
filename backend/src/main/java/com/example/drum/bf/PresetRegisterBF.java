@@ -23,7 +23,8 @@ public class PresetRegisterBF {
                 dto.getStartBpm(),
                 dto.getMaxBpm(),
                 dto.getAccInterval(),
-                dto.getAccAmount()
+                dto.getAccAmount(),
+                dto.getAccMode()
         );
 
         return new PresetResponseDto(preset.getId(), "プリセット「" + preset.getName() + "」を保存しました。");

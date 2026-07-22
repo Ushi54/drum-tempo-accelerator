@@ -16,3 +16,6 @@ CREATE TABLE IF NOT EXISTS presets (
     acc_amount INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- acc_mode カラムの追加 (既存テーブル向け)
+ALTER TABLE presets ADD COLUMN IF NOT EXISTS acc_mode VARCHAR(20) DEFAULT 'bars';

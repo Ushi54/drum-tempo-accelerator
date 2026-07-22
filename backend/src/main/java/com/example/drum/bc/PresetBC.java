@@ -14,9 +14,9 @@ public class PresetBC {
     @Autowired
     private PresetMapper presetMapper;
 
-    public PresetEntity registerPreset(String userId, String name, int startBpm, int maxBpm, int accInterval, int accAmount) {
+    public PresetEntity registerPreset(String userId, String name, int startBpm, int maxBpm, int accInterval, int accAmount, String accMode) {
         String uuid = UUID.randomUUID().toString();
-        PresetEntity preset = new PresetEntity(uuid, userId, name, startBpm, maxBpm, accInterval, accAmount);
+        PresetEntity preset = new PresetEntity(uuid, userId, name, startBpm, maxBpm, accInterval, accAmount, accMode);
         presetMapper.insertPreset(preset);
         return preset;
     }

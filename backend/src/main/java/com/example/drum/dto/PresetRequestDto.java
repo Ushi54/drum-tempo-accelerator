@@ -10,4 +10,5 @@ public class PresetRequestDto {
     private int maxBpm;
     private int accInterval;
     private int accAmount;
+    private String accMode;
 }
