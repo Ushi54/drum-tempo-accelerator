@@ -632,6 +632,7 @@ export default function Home() {
               type="checkbox"
               checked={autoAccelerate && accMode === "bars"}
               onChange={(e) => {
+                if (isPlaying) stopSession();
                 if (e.target.checked) {
                   setAccMode("bars");
                   setAutoAccelerate(true);
@@ -654,6 +655,7 @@ export default function Home() {
               type="checkbox"
               checked={autoAccelerate && accMode === "time"}
               onChange={(e) => {
+                if (isPlaying) stopSession();
                 if (e.target.checked) {
                   setAccMode("time");
                   setAutoAccelerate(true);
