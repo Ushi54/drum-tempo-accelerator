@@ -15,4 +15,5 @@ public class PresetEntity {
     private int maxBpm;
     private int accInterval;
     private int accAmount;
+    private String accMode;
 }

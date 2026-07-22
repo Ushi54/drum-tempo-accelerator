@@ -9,6 +9,7 @@ interface Preset {
   maxBpm: number;
   accInterval: number;
   accAmount: number;
+  accMode?: "bars" | "time";
 }
 
 interface User {
@@ -37,6 +38,7 @@ export default function Home() {
   const [maxBpm, setMaxBpm] = useState<number | "">(160);
   const [accInterval, setAccInterval] = useState<number | "">(4);
   const [accAmount, setAccAmount] = useState<number | "">(5);
+  const [accMode, setAccMode] = useState<"bars" | "time">("bars");
 
   // Auth / Presets State
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -109,8 +111,14 @@ export default function Home() {
   const maxBpmRef = useRef<number>(Number(maxBpm) || 160);
   const accIntervalRef = useRef<number>(Number(accInterval) || 4);
   const accAmountRef = useRef<number>(Number(accAmount) || 5);
+  const accModeRef = useRef<"bars" | "time">(accMode);
+
+  // For time-based acceleration
+  const sessionStartTimeRef = useRef(0.0);
+  const accelerationCountRef = useRef(0);
 
   useEffect(() => { bpmRef.current = bpm; }, [bpm]);
+  useEffect(() => { accModeRef.current = accMode; }, [accMode]);
   useEffect(() => { autoAccelerateRef.current = autoAccelerate; }, [autoAccelerate]);
   useEffect(() => { startBpmRef.current = Number(startBpm) || 30; }, [startBpm]);
   useEffect(() => { maxBpmRef.current = Number(maxBpm) || 160; }, [maxBpm]);
@@ -145,7 +153,19 @@ export default function Home() {
       measureCountRef.current++;
 
       if (autoAccelerateRef.current) {
-        if (measureCountRef.current > 0 && measureCountRef.current % accIntervalRef.current === 0) {
+        let shouldAccelerate = false;
+        if (accModeRef.current === "bars") {
+          shouldAccelerate = measureCountRef.current > 0 && measureCountRef.current % accIntervalRef.current === 0;
+        } else {
+          // Time-based acceleration
+          const currentTime = nextNoteTimeRef.current - sessionStartTimeRef.current;
+          if (currentTime > (accelerationCountRef.current + 1) * accIntervalRef.current) {
+            shouldAccelerate = true;
+            accelerationCountRef.current++;
+          }
+        }
+
+        if (shouldAccelerate) {
           if (bpmRef.current < maxBpmRef.current) {
             const oldBpm = bpmRef.current;
             const nextBpm = Math.min(maxBpmRef.current, bpmRef.current + accAmountRef.current);
@@ -241,6 +261,8 @@ export default function Home() {
       currentBeatRef.current = 0;
       measureCountRef.current = 0;
       notesInQueueRef.current = [];
+      sessionStartTimeRef.current = audioCtxRef.current.currentTime;
+      accelerationCountRef.current = 0;
 
       if (autoAccelerateRef.current) {
         const startingBpm = startBpmRef.current;
@@ -434,6 +456,11 @@ export default function Home() {
       setMaxBpm(preset.maxBpm);
       setAccInterval(preset.accInterval);
       setAccAmount(preset.accAmount);
+      if (preset.accMode) {
+        setAccMode(preset.accMode);
+      } else {
+        setAccMode("bars");
+      }
 
       // 停止したため、BPM値をプリセットの初期値に更新
       setBpm(preset.startBpm);
@@ -485,6 +512,7 @@ export default function Home() {
           maxBpm,
           accInterval,
           accAmount,
+          accMode,
         }),
       });
 
@@ -653,6 +681,32 @@ export default function Home() {
         )}
 
         <div className={`param-inputs ${autoAccelerate ? "expanded" : ""}`} id="accParams">
+          <div style={{ display: "flex", gap: "10px", marginBottom: "12px", background: "rgba(0,0,0,0.2)", padding: "4px", borderRadius: "8px" }}>
+            <button
+              onClick={() => setAccMode("bars")}
+              style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", background: accMode === "bars" ? "var(--accent-primary)" : "transparent", color: accMode === "bars" ? "#2a2f22" : "var(--text-muted)", transition: "all 0.2s" }}
+            >
+              小節ごと
+            </button>
+            <button
+              onClick={() => {
+                setAccMode("time");
+                if (!currentUser) {
+                  setAccInterval(10);
+                }
+              }}
+              style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem", background: accMode === "time" ? "var(--accent-primary)" : "transparent", color: accMode === "time" ? "#2a2f22" : "var(--text-muted)", transition: "all 0.2s" }}
+            >
+              時間（秒）ごと
+            </button>
+          </div>
+          
+          {accMode === "time" && !currentUser && (
+            <div style={{ fontSize: "0.7rem", color: "var(--accent-secondary)", textAlign: "center", marginBottom: "8px" }}>
+              🔒 無料版は10秒固定です（有料版で自由に設定可能）
+            </div>
+          )}
+
           <div className="grid-inputs" style={{ gridTemplateColumns: "1fr auto 1fr", gap: "6px", alignItems: "center", marginTop: "5px" }}>
             <div className="input-box">
               <label htmlFor="startBpm">開始 BPM</label>
@@ -690,18 +744,26 @@ export default function Home() {
               />
             </div>
             <div className="input-box">
-              <label htmlFor="accInterval">加速間隔 (小節数)</label>
+              <label htmlFor="accInterval">
+                {accMode === "bars" ? "加速間隔 (小節数)" : "加速間隔 (秒数)"}
+              </label>
               <input
                 type="number"
                 id="accInterval"
                 min="1"
-                max="100"
+                max={accMode === "time" ? 300 : 100}
                 value={accInterval}
+                disabled={accMode === "time" && !currentUser}
                 onChange={(e) => setAccInterval(e.target.value === "" ? "" : Number(e.target.value))}
                 onBlur={() => {
                   let val = Number(accInterval);
-                  if (isNaN(val) || val < 1) val = 4;
-                  if (val > 100) val = 100;
+                  if (isNaN(val) || val < 1) val = accMode === "bars" ? 4 : 10;
+                  const maxLimit = accMode === "time" ? 300 : 100;
+                  if (val > maxLimit) val = maxLimit;
+                  
+                  // 無料版の時間モード制限
+                  if (accMode === "time" && !currentUser) val = 10;
+                  
                   setAccInterval(val);
                 }}
               />

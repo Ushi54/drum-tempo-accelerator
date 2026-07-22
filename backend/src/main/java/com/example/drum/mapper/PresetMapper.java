@@ -12,8 +12,8 @@ import java.util.List;
 @Mapper
 public interface PresetMapper {
 
-    @Insert("INSERT INTO presets (id, user_id, name, start_bpm, max_bpm, acc_interval, acc_amount) " +
-            "VALUES (#{id}, #{userId}, #{name}, #{startBpm}, #{maxBpm}, #{accInterval}, #{accAmount})")
+    @Insert("INSERT INTO presets (id, user_id, name, start_bpm, max_bpm, acc_interval, acc_amount, acc_mode) " +
+            "VALUES (#{id}, #{userId}, #{name}, #{startBpm}, #{maxBpm}, #{accInterval}, #{accAmount}, #{accMode})")
     void insertPreset(PresetEntity preset);
 
     @Select("SELECT * FROM presets WHERE CAST(user_id AS VARCHAR) = #{userId} ORDER BY name ASC")
