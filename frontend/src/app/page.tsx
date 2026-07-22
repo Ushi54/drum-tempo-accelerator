@@ -104,6 +104,8 @@ export default function Home() {
   // Focus Ref for preset save modal
   const saveInputRef = useRef<HTMLInputElement>(null);
 
+  const isPlayingRef = useRef(false);
+
   // Sync state values to refs for the scheduler async loop
   const bpmRef = useRef(bpm);
   const autoAccelerateRef = useRef(autoAccelerate);
@@ -211,10 +213,11 @@ export default function Home() {
   };
 
   const scheduler = () => {
-    if (!audioCtxRef.current) return;
+    if (!audioCtxRef.current || !isPlayingRef.current) return;
     while (nextNoteTimeRef.current < audioCtxRef.current.currentTime + scheduleAheadTime) {
       scheduleNote(currentBeatRef.current, nextNoteTimeRef.current);
       nextNote();
+      if (!isPlayingRef.current) return;
     }
     timerIDRef.current = setTimeout(scheduler, lookahead);
   };
@@ -258,6 +261,7 @@ export default function Home() {
       }
 
       setIsPlaying(true);
+      isPlayingRef.current = true;
       currentBeatRef.current = 0;
       measureCountRef.current = 0;
       notesInQueueRef.current = [];
@@ -283,6 +287,7 @@ export default function Home() {
 
   const stopSession = () => {
     setIsPlaying(false);
+    isPlayingRef.current = false;
     if (timerIDRef.current) {
       clearTimeout(timerIDRef.current);
       timerIDRef.current = null;
