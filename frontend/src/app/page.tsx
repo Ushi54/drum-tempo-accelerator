@@ -32,6 +32,7 @@ export default function Home() {
   const [activeBeat, setActiveBeat] = useState(-1);
   const [ringPulseClass, setRingPulseClass] = useState("");
   const [autoAccelerate, setAutoAccelerate] = useState(false);
+  const [isAccentOn, setIsAccentOn] = useState(true);
 
   // Accelerator parameters
   const [startBpm, setStartBpm] = useState<number | "">(100);
@@ -131,12 +132,14 @@ export default function Home() {
   const accIntervalRef = useRef<number>(Number(accInterval) || 4);
   const accAmountRef = useRef<number>(Number(accAmount) || 5);
   const accModeRef = useRef<"bars" | "time">(accMode);
+  const isAccentOnRef = useRef(isAccentOn);
 
   // For time-based acceleration
   const sessionStartTimeRef = useRef(0.0);
   const accelerationCountRef = useRef(0);
 
   useEffect(() => { bpmRef.current = bpm; }, [bpm]);
+  useEffect(() => { isAccentOnRef.current = isAccentOn; }, [isAccentOn]);
   useEffect(() => { accModeRef.current = accMode; }, [accMode]);
   useEffect(() => { autoAccelerateRef.current = autoAccelerate; }, [autoAccelerate]);
   useEffect(() => { startBpmRef.current = Number(startBpm) || 30; }, [startBpm]);
@@ -214,7 +217,7 @@ export default function Home() {
     osc.connect(gainNode);
     gainNode.connect(audioCtxRef.current.destination);
 
-    if (beatNumber === 0) {
+    if (beatNumber === 0 && isAccentOnRef.current) {
       osc.frequency.setValueAtTime(1200, time); // High click
     } else {
       osc.frequency.setValueAtTime(800, time); // Normal click
@@ -247,7 +250,7 @@ export default function Home() {
         const beatNum = activeBeatInfo.note;
         setActiveBeat(beatNum);
 
-        if (beatNum === 0) {
+        if (beatNum === 0 && isAccentOnRef.current) {
           setRingPulseClass("active-accent-1");
           setTimeout(() => {
             setRingPulseClass("");
@@ -605,26 +608,35 @@ export default function Home() {
       </header>
 
       <div className="display-section">
-        <div className={`bpm-ring-outer ${ringPulseClass}`} id="bpmRing">
-          <input
-            type="number"
-            className="bpm-number-input"
-            id="bpmValInput"
-            value={bpm === 0 ? "" : bpm}
-            disabled={autoAccelerate}
-            onChange={handleBpmInputChange}
-            onBlur={handleBpmInputBlur}
-            min="30"
-            max="300"
-          />
-          <div className="bpm-label">BPM</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: '100%', maxWidth: '280px' }}>
+          <div className={`bpm-ring-outer ${ringPulseClass}`} id="bpmRing">
+            <input
+              type="number"
+              className="bpm-number-input"
+              id="bpmValInput"
+              value={bpm === 0 ? "" : bpm}
+              disabled={autoAccelerate}
+              onChange={handleBpmInputChange}
+              onBlur={handleBpmInputBlur}
+              min="30"
+              max="300"
+            />
+            <div className="bpm-label">BPM</div>
+          </div>
+          <button 
+            onClick={() => setIsAccentOn(!isAccentOn)}
+            className={`accent-toggle-btn ${isAccentOn ? "on" : "off"}`}
+            title="アクセントのオン/オフ"
+          >
+            {isAccentOn ? "🔔" : "🔕"}
+          </button>
         </div>
 
         <div className="beat-indicators">
           {[0, 1, 2, 3].map((index) => (
             <div
               key={index}
-              className={`dot ${activeBeat === index ? (index === 0 ? "active-beat-1" : "active-beat-other") : ""}`}
+              className={`dot ${activeBeat === index ? (index === 0 && isAccentOn ? "active-beat-1" : "active-beat-other") : ""}`}
               id={`dot-${index}`}
             />
           ))}
