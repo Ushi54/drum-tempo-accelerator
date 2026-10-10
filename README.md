@@ -4,7 +4,7 @@
 ログインもサーバーもない静的サイトで、プリセットはブラウザ（localStorage）に保存する。
 
 要件定義：Obsidian 保管庫 `08_Projects/【Project】メトロノーム再開発_要件定義.md`
-前の版（Next.js + Spring Boot）：`~/Developer/drum_prototype`
+前の版（Next.js + Spring Boot）：`~/Developer/drum_prototype`、GitHub の `legacy-nextjs` ブランチ
 
 ## 機能
 - 拍子 1〜16 / 4・8、8分の拍子の区切り（7/8 なら 2+2+3 / 2+3+2 / 3+2+2）
