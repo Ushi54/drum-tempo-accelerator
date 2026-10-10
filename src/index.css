@@ -1,0 +1,503 @@
+/* 色は前の版の「ヨルシカ風」を引き継ぐ：藍色の夜空、茜色の夕暮れ、月光のイエロー */
+:root {
+  --bg: #0b111e;
+  --bg-gradient: linear-gradient(135deg, #0b111e 0%, #152238 60%, #2b1f31 100%);
+  --card: rgba(21, 34, 56, 0.55);
+  --field: rgba(11, 17, 30, 0.55);
+  --border: rgba(224, 229, 236, 0.15);
+  --akane: #d05a3f;
+  --moon: #ebd39c;
+  --ainezu: #4c6b8c;
+  --text: #e8ecf1;
+  --muted: #7f91a8;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg-gradient) fixed;
+  color: var(--text);
+  font-family: "Yu Gothic Medium", "游ゴシック Medium", YuGothic, -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 1画面に収める。スマホをドラムの横に置いても、スタートボタンまで見える高さにする */
+.app {
+  width: 100%;
+  max-width: 440px;
+  min-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  background: linear-gradient(to right, var(--akane), var(--moon));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 8px;
+}
+
+.warning {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--akane);
+}
+
+/* プリセット */
+.preset-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.preset-bar select {
+  flex: 1;
+  min-width: 0;
+}
+
+select,
+.number-field,
+.text-input {
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+.small-btn {
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--moon);
+  background: rgba(235, 211, 156, 0.12);
+  color: var(--moon);
+  white-space: nowrap;
+}
+
+.small-btn.ghost {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+}
+
+.small-btn.danger {
+  border-color: var(--akane);
+  background: rgba(208, 90, 63, 0.18);
+  color: #f2b3a3;
+}
+
+/* 拍の表示 */
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.beat-display {
+  width: 100%;
+  padding: 0 18px 0 10px;
+}
+
+.beat-track {
+  position: relative;
+  height: 28px;
+}
+
+.beat-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: -8px;
+  top: 50%;
+  border-top: 1px dashed var(--border);
+}
+
+.beat-track.poly {
+  height: 22px;
+}
+
+.beat-dot,
+.poly-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.06s, background 0.06s, box-shadow 0.06s;
+}
+
+.beat-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(127, 145, 168, 0.35);
+}
+
+.beat-dot.group {
+  width: 18px;
+  height: 18px;
+  background: rgba(235, 211, 156, 0.35);
+}
+
+.beat-dot.downbeat {
+  width: 22px;
+  height: 22px;
+  background: rgba(208, 90, 63, 0.45);
+}
+
+.beat-dot.active {
+  background: var(--moon);
+  box-shadow: 0 0 14px var(--moon);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.beat-dot.downbeat.active {
+  background: var(--akane);
+  box-shadow: 0 0 16px var(--akane);
+}
+
+.poly-dot {
+  width: 12px;
+  height: 12px;
+  background: rgba(76, 107, 140, 0.6);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.poly-dot.active {
+  background: #8fb3d9;
+  box-shadow: 0 0 12px #8fb3d9;
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.25);
+}
+
+/* テンポ */
+.tempo {
+  text-align: center;
+}
+
+.tempo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tempo-value {
+  font-size: 3.6rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--moon);
+}
+
+input.tempo-value {
+  width: 3.6em;
+  font-size: 3.2rem;
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.tempo-unit {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.countdown {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown.live {
+  color: var(--text);
+}
+
+.round-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--field);
+  font-size: 1.3rem;
+}
+
+/* 設定 */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(11, 17, 30, 0.35);
+  border: 1px solid var(--border);
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.field select,
+.field .toggle {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.meter-select {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meter-select select {
+  flex: 1;
+}
+
+.slash {
+  color: var(--muted);
+}
+
+.toggle {
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--field);
+}
+
+.toggle.on {
+  border-color: var(--akane);
+  color: #f2b3a3;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.segmented button {
+  padding: 7px 0;
+  border: none;
+  background: var(--field);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.segmented button.selected {
+  background: rgba(208, 90, 63, 0.3);
+  color: var(--text);
+}
+
+.accel-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.accel-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.accel-row .number-field {
+  width: 4.2em;
+  text-align: center;
+  color: var(--text);
+}
+
+/* スタート */
+.play-btn {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: 18px;
+  border: none;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--akane), #b4485f);
+  box-shadow: 0 10px 25px -8px rgba(208, 90, 63, 0.6);
+}
+
+.play-btn.playing {
+  background: linear-gradient(135deg, var(--ainezu), #2f4560);
+  box-shadow: none;
+}
+
+/* モーダル */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 15, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+}
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  border-radius: 20px;
+  background: #152238;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal h2 {
+  font-size: 1rem;
+  color: var(--moon);
+}
+
+.modal-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.text-input {
+  width: 100%;
+}
+
+.achievement {
+  font-size: 2.4rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--moon);
+}
+
+/* number の上下ボタンは場所を取るので隠す */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* 背の低い画面（iPhone SE など）では余白を詰めて、スタートボタンまで1画面に収める */
+@media (max-height: 720px) {
+  body {
+    padding: 8px 12px;
+  }
+
+  .app {
+    min-height: calc(100dvh - 16px);
+    gap: 8px;
+    padding: 12px;
+  }
+
+  h1 {
+    margin-bottom: 6px;
+  }
+
+  .stage {
+    gap: 4px;
+    padding: 0;
+  }
+
+  .tempo-value {
+    font-size: 3rem;
+  }
+
+  input.tempo-value {
+    font-size: 2.7rem;
+  }
+
+  .countdown {
+    margin-top: 4px;
+  }
+
+  .panel {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .panel-grid {
+    gap: 6px;
+  }
+
+  .accel-fields {
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .play-btn {
+    padding: 12px;
+  }
+}
