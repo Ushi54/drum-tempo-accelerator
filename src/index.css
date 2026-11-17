@@ -1,22 +1,18 @@
-/* design_system スキルの配色（オーガニック／セージグリーン×クリーム）。
-   ポートフォリオやポモドーロと同じ7色＋白＋濃い茶色だけを使う。
-   拍は緑の系統、ポリリズムは砂色の系統にして、2つの音を色でも聞き分けられるようにする。 */
+/* design_system スキルの「デザインB：ミニマル・ダーク」（2026-11-17 変更）。
+   真っ黒の背景に、白の極細ゴシックだけ。見本は ~/Developer/life-countdown と ~/Developer/today-cards。
+   色のアクセントは使わず、情報は文字の明るさ（白／グレー）と形の差だけで分ける。
+   拍は丸、ポリリズムはひし形にして、2つの音を形で見分けられるようにする。 */
 :root {
-  --green-dark: #6f9b88; /* color-A */
-  --green: #a3c2ad; /* color-B */
-  --green-light: #dce5d2; /* color-C */
-  --cream: #f5efe1; /* color-D */
-  --beige: #efe2cc; /* color-E */
-  --sand: #e0c6a5; /* color-F */
-  --sand-dark: #c9a47b; /* color-G */
-  --white: #ffffff;
-  --text: #2d241e;
-  --text-sub: #6b5a4c; /* 濃い茶色を薄めた補足用 */
+  --bg: #0b0b0b; /* 背景（純黒ではなく、わずかに明るい黒） */
+  --card: #141414; /* カード・入力欄の背景 */
+  --line: #262626; /* 枠線 */
+  --fg: #f2f2f2; /* 主役の文字 */
+  --sub: #9a9a9a; /* 脇役の文字 */
+  --dim: #4a4a4a; /* 使えないもの・目立たせないもの */
+  --error: #c97a7a; /* どうしても色が要る時だけ */
 
-  --font-ui: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif;
-  --font-num: 'Nunito', 'Zen Maru Gothic', sans-serif;
-  --shadow-soft: 0 10px 30px -12px rgba(111, 155, 136, 0.35);
-  color-scheme: light;
+  --font: 'Noto Sans JP', 'Hiragino Sans', 'YuGothic', sans-serif;
+  color-scheme: dark;
 }
 
 * {
@@ -26,19 +22,23 @@
 }
 
 html {
-  background: var(--cream);
+  background: var(--bg);
 }
 
 body {
   min-height: 100dvh;
-  background: var(--cream);
-  color: var(--text);
-  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-weight: 200;
   font-size: 16px;
+  letter-spacing: 0.04em;
   -webkit-font-smoothing: antialiased;
   display: flex;
   justify-content: center;
   padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 button,
@@ -46,22 +46,28 @@ select,
 input {
   font: inherit;
   color: inherit;
+  letter-spacing: inherit;
 }
 
 button {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: transform 0.3s, border-color 0.3s, color 0.3s, background 0.3s;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 button:disabled,
 select:disabled,
 input:disabled {
-  opacity: 0.5;
+  color: var(--dim);
   cursor: not-allowed;
 }
 
 :focus-visible {
-  outline: 2px solid var(--green-dark);
+  outline: 1px solid var(--sub);
   outline-offset: 2px;
 }
 
@@ -73,25 +79,24 @@ input:disabled {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px;
-  background: var(--white);
-  border-radius: 2rem;
-  box-shadow: var(--shadow-soft);
+  padding: 20px 4px;
 }
 
 h1 {
-  font-family: var(--font-num);
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 200;
   text-align: center;
-  color: var(--green-dark);
+  color: var(--sub);
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
   margin-bottom: 10px;
 }
 
 .warning {
   margin-top: 6px;
   font-size: 0.875rem;
-  color: var(--text-sub);
+  color: var(--error);
 }
 
 /* 入力欄。iPhone は 16px 未満の入力欄を押すと画面が拡大されるので、16px にそろえる */
@@ -99,18 +104,18 @@ select,
 .number-field,
 .text-input {
   font-size: 16px;
-  background-color: var(--cream);
-  border: 1.5px solid var(--sand);
+  background-color: var(--card);
+  border: 1px solid var(--line);
   border-radius: 999px;
   padding: 7px 14px;
-  color: var(--text);
+  color: var(--fg);
 }
 
 select {
   appearance: none;
   -webkit-appearance: none;
   padding-right: 32px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23C9A47B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%239A9A9A' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
 }
@@ -129,24 +134,20 @@ select {
 .small-btn {
   padding: 7px 16px;
   border-radius: 999px;
-  border: 1.5px solid var(--green-dark);
-  background: var(--green-dark);
-  color: var(--white);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
   font-size: 0.875rem;
-  font-weight: 700;
   white-space: nowrap;
 }
 
 .small-btn.ghost {
-  border-color: var(--sand);
-  background: transparent;
-  color: var(--text-sub);
+  color: var(--sub);
 }
 
 .small-btn.danger {
-  border-color: var(--sand-dark);
-  background: var(--sand-dark);
-  color: var(--white);
+  border-color: var(--error);
+  color: var(--error);
 }
 
 /* 拍の表示（この画面で一番目立たせる所）。1小節を左から右への時間の線として描く */
@@ -160,9 +161,10 @@ select {
 
 .beat-display {
   width: 100%;
-  padding: 14px 26px 14px 18px;
-  background: var(--green-light);
-  border-radius: 1.5rem;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
 }
 
 .beat-track {
@@ -174,17 +176,13 @@ select {
   content: '';
   position: absolute;
   left: 0;
-  right: -10px;
+  right: 0;
   top: 50%;
-  border-top: 2px dotted var(--green);
+  border-top: 1px solid var(--line);
 }
 
 .beat-track.poly {
   height: 24px;
-}
-
-.beat-track.poly::before {
-  border-top-color: var(--sand);
 }
 
 .beat-dot,
@@ -192,54 +190,114 @@ select {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  transition: transform 0.07s ease-out, background 0.07s, box-shadow 0.07s;
+  transition: transform 0.07s ease-out, background 0.07s, border-color 0.07s, box-shadow 0.12s;
 }
 
+/* 拍：白く塗った丸（黒い丸は使わない。止まっている時も白のまま。2026-11-17 社長の希望）。
+   小節の頭 → グループの頭 → 普通の拍 の順に大きくして、アクセントの位置を大きさで見せる */
 .beat-dot {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--white);
-  border: 2px solid var(--green);
+  background: var(--fg);
+  border: none;
 }
 
 .beat-dot.group {
-  width: 18px;
-  height: 18px;
-  border-color: var(--green-dark);
+  width: 14px;
+  height: 14px;
 }
 
 .beat-dot.downbeat {
-  width: 24px;
-  height: 24px;
-  background: var(--green);
-  border-color: var(--green-dark);
+  width: 20px;
+  height: 20px;
 }
 
+/* 鳴った拍は白く光らせる。暗い部屋でもドラムの横から見えるように、
+   鳴った瞬間に強く光って、すぐ少し落ち着く。デザインBは影を使わない決まりだが、
+   この光り方だけは社長の希望で入れている（2026-11-17） */
 .beat-dot.active {
-  background: var(--green-dark);
-  border-color: var(--green-dark);
-  box-shadow: 0 0 0 6px rgba(111, 155, 136, 0.25);
-  transform: translate(-50%, -50%) scale(1.15);
+  background: #ffffff;
+  transform: translate(-50%, -50%) scale(1.3);
+  box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.55);
+  animation: beat-flash 0.18s ease-out;
 }
 
-/* ポリリズムの音は葉っぱの形 */
+@keyframes beat-flash {
+  from {
+    transform: translate(-50%, -50%) scale(1.6);
+    box-shadow: 0 0 22px 9px rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* ポリリズムの音：グレーで塗ったひし形 */
 .poly-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 0 100% 0 100%;
-  background: var(--sand);
+  width: 9px;
+  height: 9px;
+  background: var(--sub);
+  border: none;
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .poly-dot.active {
-  background: var(--sand-dark);
-  box-shadow: 0 0 0 5px rgba(201, 164, 123, 0.3);
-  transform: translate(-50%, -50%) scale(1.25);
+  background: var(--fg);
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.4);
+  box-shadow: 0 0 8px 2px rgba(154, 154, 154, 0.5);
 }
 
-/* テンポ */
+/* テンポ（主役） */
 .tempo {
+  width: 100%;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* テンポのスライダー。細い線と白い丸だけにする（デザインB） */
+.tempo-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  max-width: 320px;
+  height: 28px;
+  margin-top: 10px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-x;
+}
+
+.tempo-slider::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--line);
+}
+
+.tempo-slider::-moz-range-track {
+  height: 1px;
+  background: var(--line);
+}
+
+.tempo-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: none;
+  transition: transform 0.3s;
+}
+
+.tempo-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: none;
+}
+
+.tempo-slider:active::-webkit-slider-thumb {
+  transform: scale(1.15);
 }
 
 .tempo-row {
@@ -249,28 +307,30 @@ select {
 }
 
 .tempo-value {
-  font-family: var(--font-num);
-  font-size: 4rem;
-  font-weight: 800;
+  font-size: 4.6rem;
+  font-weight: 100;
   line-height: 1;
+  letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: var(--fg);
 }
 
 input.tempo-value {
-  width: 3.2em;
+  width: 3em;
   text-align: center;
   background: transparent;
   border: none;
-  border-radius: 1rem;
+  border-radius: 14px;
   padding: 0;
-  font-size: 3.6rem;
+  font-size: 4.2rem;
 }
 
 .tempo-unit {
-  font-size: 0.875rem;
-  color: var(--text-sub);
-  margin-top: 4px;
+  font-size: 11px;
+  color: var(--sub);
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
+  margin-top: 6px;
 }
 
 .countdown {
@@ -278,26 +338,25 @@ input.tempo-value {
   padding: 6px 16px;
   border-radius: 999px;
   font-size: 0.875rem;
-  color: var(--text-sub);
-  background: var(--cream);
+  color: var(--dim);
+  letter-spacing: 0.15em;
   font-variant-numeric: tabular-nums;
 }
 
 .countdown.live {
-  color: var(--text);
-  background: var(--beige);
-  font-weight: 700;
+  color: var(--fg);
+  border: 1px solid var(--line);
 }
 
 .round-btn {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1.5px solid var(--green);
-  background: var(--white);
-  color: var(--green-dark);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--sub);
   font-size: 1.4rem;
-  font-weight: 700;
+  font-weight: 100;
 }
 
 /* 設定 */
@@ -306,13 +365,14 @@ input.tempo-value {
   flex-direction: column;
   gap: 14px;
   padding: 16px;
-  border-radius: 1.5rem;
-  background: var(--cream);
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
 }
 
 .panel select,
 .panel .number-field {
-  background-color: var(--white);
+  background-color: var(--bg);
 }
 
 .panel-grid {
@@ -325,8 +385,9 @@ input.tempo-value {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.875rem;
-  color: var(--text-sub);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--sub);
 }
 
 .meter-select {
@@ -341,29 +402,27 @@ input.tempo-value {
 }
 
 .slash {
-  color: var(--sand-dark);
-  font-weight: 700;
+  color: var(--dim);
 }
 
 .toggle {
   font-size: 16px;
   padding: 7px 14px;
   border-radius: 999px;
-  border: 1.5px solid var(--sand);
-  background: var(--white);
-  color: var(--text-sub);
-  font-weight: 700;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--dim);
 }
 
 .toggle.on {
-  border-color: var(--green-dark);
-  background: var(--green-light);
-  color: var(--text);
+  border-color: var(--sub);
+  color: var(--fg);
 }
 
 .field-label {
-  font-size: 0.875rem;
-  color: var(--text-sub);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--sub);
   margin-bottom: 6px;
 }
 
@@ -371,25 +430,23 @@ input.tempo-value {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
-  padding: 4px;
+  padding: 3px;
   border-radius: 999px;
-  background: var(--beige);
+  border: 1px solid var(--line);
 }
 
 .segmented button {
   padding: 7px 0;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text-sub);
+  color: var(--dim);
 }
 
 .segmented button.selected {
-  background: var(--white);
-  color: var(--green-dark);
-  box-shadow: 0 2px 8px -3px rgba(201, 164, 123, 0.6);
+  border-color: var(--sub);
+  color: var(--fg);
 }
 
 .accel-fields {
@@ -404,18 +461,18 @@ input.tempo-value {
   align-items: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: var(--text-sub);
+  color: var(--sub);
 }
 
 .accel-row .number-field {
   width: 4.6em;
   padding: 7px 8px;
   text-align: center;
-  font-family: var(--font-num);
-  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
-/* スタート。画面に収まらない端末（iPhone SE の Safari など）でも、下に固定していつでも押せるようにする */
+/* スタート。画面に収まらない端末（iPhone SE の Safari など）でも、下に固定していつでも押せるようにする。
+   下に固定するので、後ろの文字が透けないよう背景は塗る（色は背景と同じ黒） */
 .play-btn {
   position: sticky;
   bottom: 12px;
@@ -423,24 +480,24 @@ input.tempo-value {
   margin-top: auto;
   padding: 16px;
   border-radius: 999px;
-  border: none;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--white);
-  background: var(--green-dark);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--fg);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 1.1rem;
+  letter-spacing: 0.4em;
+  padding-left: calc(16px + 0.4em);
 }
 
 .play-btn.playing {
-  background: var(--sand-dark);
-  box-shadow: none;
+  border-color: var(--line);
+  color: var(--sub);
 }
 
 /* モーダル */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(45, 36, 30, 0.35);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,23 +509,24 @@ input.tempo-value {
   width: 100%;
   max-width: 360px;
   padding: 24px;
-  border-radius: 2rem;
-  background: var(--white);
-  box-shadow: var(--shadow-soft);
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
 .modal h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--green-dark);
+  font-size: 1rem;
+  font-weight: 200;
+  letter-spacing: 0.15em;
+  color: var(--fg);
 }
 
 .modal-note {
   font-size: 0.875rem;
-  color: var(--text-sub);
+  color: var(--sub);
 }
 
 .modal-actions {
@@ -482,11 +540,11 @@ input.tempo-value {
 }
 
 .achievement {
-  font-family: var(--font-num);
-  font-size: 2.6rem;
-  font-weight: 800;
+  font-size: 3rem;
+  font-weight: 100;
   text-align: center;
-  color: var(--green-dark);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
 }
 
 /* number の上下ボタンは場所を取るので隠す */
@@ -510,7 +568,7 @@ input[type='number'] {
   .app {
     min-height: calc(100dvh - 16px);
     gap: 10px;
-    padding: 14px;
+    padding: 14px 2px;
   }
 
   h1 {
@@ -523,20 +581,25 @@ input[type='number'] {
   }
 
   .beat-display {
-    padding: 8px 26px 8px 18px;
+    padding: 8px 18px;
   }
 
   .tempo-value {
-    font-size: 3.2rem;
+    font-size: 3.8rem;
   }
 
   input.tempo-value {
-    font-size: 3rem;
+    font-size: 3.5rem;
   }
 
   .round-btn {
     width: 44px;
     height: 44px;
+  }
+
+  .tempo-slider {
+    margin-top: 4px;
+    height: 24px;
   }
 
   .countdown {
@@ -557,7 +620,8 @@ input[type='number'] {
   }
 
   .play-btn {
-    padding: 13px;
+    padding-top: 13px;
+    padding-bottom: 13px;
   }
 }
 
@@ -576,11 +640,11 @@ input[type='number'] {
   }
 
   .tempo-value {
-    font-size: 2.6rem;
+    font-size: 3rem;
   }
 
   input.tempo-value {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
   }
 
   .tempo-unit {
@@ -601,13 +665,16 @@ input[type='number'] {
   }
 
   .play-btn {
-    padding: 11px;
+    padding-top: 11px;
+    padding-bottom: 11px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .beat-dot,
-  .poly-dot {
+  .poly-dot,
+  button {
     transition: none;
+    animation: none;
   }
 }

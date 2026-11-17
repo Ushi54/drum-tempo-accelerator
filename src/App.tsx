@@ -106,7 +106,7 @@ export default function App() {
         className={`play-btn ${metronome.isPlaying ? 'playing' : ''}`}
         onClick={metronome.isPlaying ? metronome.stop : metronome.start}
       >
-        {metronome.isPlaying ? '■ ストップ' : '▶ スタート'}
+        {metronome.isPlaying ? '■ STOP' : '▶ START'}
       </button>
 
       {metronome.reachedTarget && (

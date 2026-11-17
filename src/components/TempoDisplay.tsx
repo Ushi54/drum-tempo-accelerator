@@ -47,6 +47,17 @@ export function TempoDisplay({ settings, isPlaying, playingBpm, countdown, onBpm
         />
         <button className="round-btn" onClick={() => step(1)} aria-label="BPMを1上げる">＋</button>
       </div>
+      {/* 直感でテンポを決めたい時用。数字の入力・±ボタンと同じ settings.bpm を動かす */}
+      <input
+        type="range"
+        className="tempo-slider"
+        aria-label="BPMをスライドで変える"
+        min={BPM_MIN}
+        max={BPM_MAX}
+        step={1}
+        value={settings.bpm}
+        onChange={(e) => onBpmChange(Number(e.target.value))}
+      />
       <div className="tempo-unit">BPM（{settings.meter.unit === 8 ? '8分音符' : '4分音符'}）</div>
     </div>
   );
