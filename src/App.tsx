@@ -63,8 +63,8 @@ export default function App() {
 
   return (
     <main className="app">
+      <h1 className="app-title">Accel</h1>
       <header>
-        <h1 className="visually-hidden">Accel</h1>
         <PresetBar
           presets={presets}
           selectedId={selectedId}

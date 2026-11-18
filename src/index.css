@@ -82,7 +82,8 @@ input:disabled {
   padding: 20px 4px;
 }
 
-h1 {
+/* アプリ名。上に余白を取り、iPhoneのダイナミックアイランドや画面の上端から離す（2026-11-18 社長の希望） */
+.app-title {
   font-size: 13px;
   font-weight: 200;
   text-align: center;
@@ -90,7 +91,7 @@ h1 {
   text-transform: uppercase;
   letter-spacing: 0.4em;
   padding-left: 0.4em;
-  margin-bottom: 10px;
+  margin-top: 24px;
 }
 
 .warning {
@@ -571,8 +572,8 @@ input[type='number'] {
     padding: 14px 2px;
   }
 
-  h1 {
-    margin-bottom: 8px;
+  .app-title {
+    margin-top: 14px;
   }
 
   .stage {
@@ -631,10 +632,6 @@ input[type='number'] {
     gap: 8px;
   }
 
-  h1 {
-    display: none;
-  }
-
   .beat-track {
     height: 26px;
   }
@@ -667,6 +664,85 @@ input[type='number'] {
   .play-btn {
     padding-top: 11px;
     padding-bottom: 11px;
+  }
+}
+
+/* 横画面（スマホを横に置いた時、iPad・Mac）。左にテンポ、右に設定の2列にして、1画面に収める。
+   左：拍の表示・テンポ・スライダー・START　右：プリセット・設定 */
+@media (orientation: landscape) and (min-width: 640px) {
+  body {
+    align-items: center;
+  }
+
+  .app {
+    max-width: 920px;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      'title title'
+      'stage header'
+      'stage panel'
+      'play panel';
+    column-gap: 28px;
+    row-gap: 12px;
+    padding: 8px 4px;
+  }
+
+  .app-title {
+    grid-area: title;
+    margin-top: 8px;
+  }
+
+  .app > header {
+    grid-area: header;
+  }
+
+  .stage {
+    grid-area: stage;
+    align-self: center;
+  }
+
+  .panel {
+    grid-area: panel;
+    align-self: start;
+  }
+
+  .play-btn {
+    grid-area: play;
+    position: static;
+    margin-top: 0;
+    align-self: end;
+  }
+}
+
+/* 横画面で高さが低い時（スマホを横にした時）は詰める */
+@media (orientation: landscape) and (min-width: 640px) and (max-height: 500px) {
+  .app {
+    row-gap: 8px;
+    padding: 4px;
+  }
+
+  .app-title {
+    margin-top: 2px;
+  }
+
+  .tempo-value {
+    font-size: 2.8rem;
+  }
+
+  input.tempo-value {
+    font-size: 2.6rem;
+  }
+
+  .panel {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .accel-fields {
+    margin-top: 6px;
   }
 }
 
