@@ -64,7 +64,7 @@ export default function App() {
   return (
     <main className="app">
       <header>
-        <h1>Drum Tempo Accelerator</h1>
+        <h1 className="visually-hidden">Accel</h1>
         <PresetBar
           presets={presets}
           selectedId={selectedId}
