@@ -746,6 +746,46 @@ input[type='number'] {
   }
 }
 
+/* PC・タブレット対応（2026-11-18 社長の決定「アプリは PC・タブレット・スマホに対応する」）。
+   レイアウトはスマホ縦・横のものをそのまま使い、大きい画面では全体を拡大して、画面に対して小さく見えないようにする。 */
+
+/* タブレット縦（iPad など）：スマホ縦の並びを拡大し、STARTを画面の一番下に離さず、すぐ下に置く */
+@media (orientation: portrait) and (min-width: 700px) {
+  body {
+    align-items: center;
+  }
+
+  .app {
+    min-height: 0;
+    zoom: 1.35;
+  }
+
+  .play-btn {
+    position: static;
+    margin-top: 8px;
+  }
+}
+
+/* 大きいタブレットの縦（iPad Pro など） */
+@media (orientation: portrait) and (min-width: 1000px) and (min-height: 1200px) {
+  .app {
+    zoom: 1.65;
+  }
+}
+
+/* PC・タブレット横の大きい画面：横画面の2列を拡大する */
+@media (orientation: landscape) and (min-width: 1280px) and (min-height: 720px) {
+  .app {
+    zoom: 1.2;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 1440px) and (min-height: 860px) {
+  .app {
+    zoom: 1.4;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .beat-dot,
   .poly-dot,
